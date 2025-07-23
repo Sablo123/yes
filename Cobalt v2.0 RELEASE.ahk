@@ -55,6 +55,7 @@ StartMacro:
     finished := false
 
 Alignment:
+    exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
     ;open backpack and place wrench in slot 2
@@ -128,6 +129,7 @@ Alignment:
     tooltipLog("Alignment complete!")
 
 SeedCycle:
+    exitIfWindowDies()
     if (currentlyAllowedSeeds.Length() = 0) {
         Gosub, TPToGear
         Return
@@ -159,11 +161,12 @@ TPToGear:
     Send, {2}
     SafeMoveRelative(0.5, 0.5)
     MouseClick, Left
-    Sleep, 200
+    Sleep, 400
     Send, {2}
     Sleep, 400
 
 GearCycle:
+    exitIfWindowDies()
     ; TODO when the gear shop is disabled but egg is still enabled, handle them differently
     If (gearItems.Length() = 0) {
         Gosub, EggCycle
@@ -200,6 +203,7 @@ GearCycle:
     }
 
 EggCycle:
+    exitIfWindowDies()
     if(currentlyAllowedEggs.Length() > 0 && canDoEgg) {
         canDoEgg := false
         tooltipLog("Going to egg shop...")
@@ -248,6 +252,7 @@ Reconnect:
     Sleep, 3000
     Run, %privateServerLink%
     Sleep, 45000
+    exitIfWindowDies()
     SendInput, {Tab}
     Sleep, 1000
     SafeClickRelative(0.5, 0.5)
@@ -255,6 +260,12 @@ Reconnect:
     Gosub, Alignment
     sendDiscordMessage("Reconnected to the game!", 65280)
 Return
+
+exitIfWindowDies() {
+    if(!WinExist("ahk_exe RobloxPlayerBeta.exe")) {
+        Gosub, Close
+    }
+}
 
 ShowTimeTip:
     SecondsUntil5 := 300 - (Mod(A_Min, 5) * 60 + A_Sec)

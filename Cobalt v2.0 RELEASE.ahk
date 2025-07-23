@@ -251,7 +251,7 @@ Reconnect:
     SendInput, {Tab}
     Sleep, 1000
     SafeClickRelative(0.5, 0.5)
-    Sleep, 2000
+    Sleep, 15000
     Gosub, Alignment
     sendDiscordMessage("Reconnected to the game!", 65280)
 Return

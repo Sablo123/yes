@@ -402,7 +402,7 @@ isShopOpen() {
         return true
     }
 
-    ; egg shop and event shops only for some fucking reason
+    ; egg shop and event shops only for some odd reason
     if(colorDetect(0x360805)) {
         return true
     }
@@ -721,7 +721,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
     Gui, Font, s10 cWhite w600, Segoe UI
-    Gui, Add, Text, x50 y110 w300 h30, Cobalt V2.0 RELEASE by Clovalt, Cobblestone
+    Gui, Add, Text, x50 y110 w330 h30, Cobalt V2.0 RELEASE by Clovalt, Cobblestone
     Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
     Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
     Gui, Add, Picture, x250 y150 w100 h100, images/clovalt.png
@@ -734,7 +734,7 @@ ShowGui:
     Gui, Add, Link, x50 y310 w150 h30, <a href="https://madefrom.rocks">Website</a>
     Gui, Add, Link, x50 y330 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
     Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/qsJ4mT3C4Z">Main Discord Server</a>
-    Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/DQRzJrqn">Macro Discord Server</a>
+    Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
 UpdatePlayerValues:

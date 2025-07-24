@@ -58,14 +58,15 @@ Alignment:
     exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
-    ;open backpack and place wrench in slot 2
     startUINav()
+    ; RE - open backpack 
+    ; RRR - go to garden
+    ; DDE - get to box and enter
     keyEncoder("RERRRDDE")
     repeatKey("Backspace", 20)
     typeString("recall")
-    repeatKey("Enter")
-    keyEncoder("DDUUEDRE")
-    ;close it
+    keyEncoder("EDDUUEDRE")
+    ; close it
     Send, ``
     tooltipLog("Aligning camera...")
     recalibrateCameraDistance()
@@ -100,28 +101,20 @@ Alignment:
     sleep, 100
     repeatKey("Tab")
     sleep, 100
-    keyEncoder("UUUUUUUUUUUDRR")
-    sleep 100
+    keyEncoder("UUUUUUUUUUUDRRW")
     repeatKey("Esc")
     sleep, 500
     startUINav()
-    sleep, 50
-    keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELL")
-    sleep 50
+    keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
     startUINav()
-    sleep 50
     repeatKey("Esc")
     sleep, 100
     repeatKey("Tab")
     sleep, 100
-    keyEncoder("UUUUUUUUUUUDRR")
-    sleep 100
+    keyEncoder("UUUUUUUUUUUDRRW")
     repeatKey("Esc")
-    sleep 100
-    keyEncoder("WDWRWE")
-    sleep 100
+    keyEncoder("WWDWRWEW")
     startUINav()
-    sleep 100
     keyEncoder("WRWRWRWRWE")
     Sleep 200
     startUINav()
@@ -221,7 +214,7 @@ EggCycle:
         }
         Sleep, 500
 
-        SafeMoveRelative(0.9, 0.1)
+        SafeMoveRelative(0.75, 0.2)
         MouseClick, Left
         Sleep 3000
 
@@ -252,7 +245,6 @@ Reconnect:
     Sleep, 3000
     Run, %privateServerLink%
     Sleep, 45000
-    exitIfWindowDies()
     SendInput, {Tab}
     Sleep, 1000
     SafeClickRelative(0.5, 0.5)
@@ -347,7 +339,7 @@ goShopping(arr, allArr, spamCount := 50) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("DDUE")
+    keyEncoder("RDUE")
 }
 
 goShoppingEgg(arr, allArr) {
@@ -384,10 +376,6 @@ buyAllAvailableEgg(spamCount := 50, item := "") {
     if(isThereStock()) {
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
-    } else {
-        ToolTip, No Stock
-        Sleep, 300
-        ToolTip
     }
     repeatKey("Down")
 }
@@ -434,6 +422,7 @@ colorDetect(c) {
 
 startUINav() {
     SendInput, {%uiNavKeybind%}
+    Sleep, 50
 }
 
 tooltipLog(message, duration := 3000) {
@@ -861,6 +850,7 @@ UpdateEggState:
 return
 
 Close:
+sendDiscordMessage("Macro exited!", 16711680)
 ExitApp
 return
 
@@ -873,6 +863,7 @@ Drag:
 return
 
 PauseMacro:
+    sendDiscordMessage("Macro paused!", 16711680)
     Gui, Submit, NoHide
     Sleep, 50
     started := 0

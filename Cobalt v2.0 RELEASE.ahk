@@ -734,7 +734,7 @@ ShowGui:
     Gui, Add, Link, x50 y310 w150 h30, <a href="https://madefrom.rocks">Website</a>
     Gui, Add, Link, x50 y330 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
     Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/qsJ4mT3C4Z">Main Discord Server</a>
-    Gui, Add, Link, x250 y330 w150 h30 <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
+    Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
 UpdatePlayerValues:

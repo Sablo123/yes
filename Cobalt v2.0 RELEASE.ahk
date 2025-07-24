@@ -60,7 +60,7 @@ Alignment:
     tooltipLog("Placing Recall Wrench in slot 2...")
     ;open backpack and place wrench in slot 2
     startUINav()
-    keyEncoder("REDDDE")
+    keyEncoder("RERRRDDE")
     repeatKey("Backspace", 20)
     typeString("recall")
     repeatKey("Enter")

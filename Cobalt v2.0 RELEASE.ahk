@@ -721,7 +721,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
     Gui, Font, s10 cWhite w600, Segoe UI
-    Gui, Add, Text, x50 y110 w300 h30, Cobalt V2.0 RELEASE by Clovalt, Cobblestone
+    Gui, Add, Text, x50 y110 w330 h30, Cobalt V2.0 RELEASE by Clovalt, Cobblestone
     Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
     Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
     Gui, Add, Picture, x250 y150 w100 h100, images/clovalt.png

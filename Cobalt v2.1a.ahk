@@ -1,4 +1,4 @@
-; Cobalt v2-RELEASE
+; Cobalt v2.1a
 
 #SingleInstance, force
 
@@ -59,13 +59,21 @@ Alignment:
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
     startUINav()
-    ; RE - open backpack 
+    ; RE - open backpack
     ; RRR - go to garden
     ; DDE - get to box and enter
-    keyEncoder("RERRRDDE")
-    repeatKey("Backspace", 20)
+    keyEncoder("ULLULLULLULLULLULL")
+    keyEncoder("RWEWRRRDURE")
+    startUINav()
+    repeatKey("Esc")
+    sleep, 10
+    repeatKey("Esc")
+    Sleep, 500
+    startUINav()
+    keyEncoder("ULLULLULLULLULLULL")
+    keyEncoder("RWERWRWRDWDRWRWRWUWUWUE")
     typeString("recall")
-    keyEncoder("EDDUUEDRE")
+    keyEncoder("EWDWUWUWEWEWDWRWE")
     ; close it
     Send, ``
     tooltipLog("Aligning camera...")
@@ -105,6 +113,8 @@ Alignment:
     repeatKey("Esc")
     sleep, 500
     startUINav()
+    keyEncoder("ULLULLULLULLULLULL")
+    sleep, 500
     keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
     startUINav()
     repeatKey("Esc")
@@ -114,10 +124,6 @@ Alignment:
     keyEncoder("UUUUUUUUUUUDRRW")
     repeatKey("Esc")
     keyEncoder("WWDWRWEW")
-    startUINav()
-    keyEncoder("WRWRWRWRWE")
-    Sleep 200
-    startUINav()
     sleep 200
     tooltipLog("Alignment complete!")
 
@@ -130,13 +136,13 @@ SeedCycle:
 
     startUINav()
     ;open shop
-    keyEncoder("RRREWWW")
+    screwJandelOrRoblox()
+    sleep, 1000
+    keyEncoder("RRREDDD")
+    sleep, 100
     SendInput, e
     Sleep, 3000
-    startUINav()
-    startUINav()
-    startUINav()
-    startUINav()
+    repeatKey("Up", 40)
     if(isShopOpen()) {
         ;we now have the carrot selected, start seed nav
         tooltipLog("Shopping for seeds...")
@@ -185,6 +191,8 @@ GearCycle:
         startUINav()
         startUINav()
         startUINav()
+        repeatKey("Up", 40)
+        Sleep, 100
         tooltipLog("Shopping for gear...")
         goShopping(currentlyAllowedGear, gearItems, 20)
         sendDiscordQueue("Gear Shop")
@@ -326,7 +334,8 @@ getMouseCoord(axis) {
 }
 
 goShopping(arr, allArr, spamCount := 50) {
-    keyEncoder("DRDDWWEEWW")
+    screwJandelOrRoblox()
+    keyEncoder("DRWWEEWW")
 
     for index, item in allArr {
         if(!contains(arr, item)) {
@@ -339,14 +348,17 @@ goShopping(arr, allArr, spamCount := 50) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("RDUE")
+    keyEncoder("LUDRE")
 }
 
 goShoppingEgg(arr, allArr) {
-    keyEncoder("DRDDWWEEWW")
+    screwJandelOrRoblox()
+    keyEncoder("DR")
+    repeatKey("Up", 40)
+    keyEncoder("RW")
     for index, item in allArr {
         if(!contains(arr, item)) {
-            repeatKey("Down", 2)
+            repeatKey("Down")
             Continue
         }
         buyAllAvailableEgg(5, item)
@@ -355,7 +367,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("RRRDE")
+    keyEncoder("LLLLURRRRRDEE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
@@ -363,6 +375,7 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Down")
     Sleep, 200
     if(isThereStock()) {
+        repeatKey("Left")
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
@@ -371,7 +384,7 @@ buyAllAvailable(spamCount := 50, item := "") {
 
 buyAllAvailableEgg(spamCount := 50, item := "") {
     repeatKey("Enter")
-    repeatKey("Down", 2)
+    repeatKey("Down")
     Sleep, 200
     if(isThereStock()) {
         repeatKey("Enter", spamCount)
@@ -418,6 +431,10 @@ colorDetect(c) {
         return true
     }
     return false
+}
+
+screwJandelOrRoblox() {
+    keyEncoder("ULLULLULLULLULLULLULLULLULLULLULLULLULLULLULLULL")
 }
 
 startUINav() {
@@ -606,16 +623,16 @@ ShowGui:
     Gui, +Caption +SysMenu +MinimizeBox +Resize
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt V2.0 RELEASE
+    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt v2.1 ALPHA
     Gui, Add, Text, x490 y0 w30 h30 vCloseBtn gClose Center hwndhCloseBtn
     GuiControl,, CloseBtn, X
     GuiControl, +BackgroundFF4444, CloseBtn
     Gui, Add, Text, x460 y0 w30 h30 vMinBtn gMinimize Center hwndMinimize
     GuiControl,, MinBtn, _
     GuiControl, +BackgroundFFAA00, MinBtn
-    Gui, Show, w520 h430, Cobalt V2.0 RELEASE
+    Gui, Show, w520 h430, Cobalt v2.1a 
     Sleep, 100
-    WinGet, hwnd, ID, Cobalt V2.0 RELEASE
+    WinGet, hwnd, ID, Cobalt v2.1a 
     style := DllCall("GetWindowLong", "Ptr", hwnd, "Int", -16, "UInt")
     style := style & ~0xC00000 & ~0x800000 & ~0x100000 & ~0x40000
     DllCall("SetWindowLong", "Ptr", hwnd, "Int", -16, "UInt", style)
@@ -710,7 +727,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
     Gui, Font, s10 cWhite w600, Segoe UI
-    Gui, Add, Text, x50 y110 w330 h30, Cobalt V2.0 RELEASE by Clovalt, Cobblestone
+    Gui, Add, Text, x50 y110 w330 h30, Cobalt v2.1 ALPHA by Clovalt, Cobblestone
     Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
     Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
     Gui, Add, Picture, x250 y150 w100 h100, images/clovalt.png
@@ -850,7 +867,7 @@ UpdateEggState:
 return
 
 Close:
-sendDiscordMessage("Macro exited!", 16711680)
+    sendDiscordMessage("Macro exited!", 16711680)
 ExitApp
 return
 

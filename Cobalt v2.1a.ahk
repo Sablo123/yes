@@ -40,6 +40,8 @@ global canDoEgg := true
 
 global started := 0
 global messageQueue := []
+global sleepPerf := 200
+global perfSetting := "Default"
 
 WinActivate, ahk_exe RobloxPlayerBeta.exe
 
@@ -75,7 +77,8 @@ Alignment:
     typeString("recall")
     keyEncoder("EWDWUWUWEWEWDWRWE")
     ; close it
-    Send, ``
+    SendInput, ``
+    Sleep, %sleepPerf% ; idk how to write this so it works with repeat key
     tooltipLog("Aligning camera...")
     recalibrateCameraDistance()
 
@@ -173,7 +176,7 @@ GearCycle:
     }
 
     tooltipLog("Opening gear shop...")
-    SendInput, e
+    repeatKey("E")
     Sleep, 3000
 
     Loop, 5 {
@@ -212,7 +215,7 @@ EggCycle:
         SendInput, {W Down}
         Sleep, 600
         SendInput, {W Up}
-
+        Sleep, %sleepPerf%
         SendInput, e
         Sleep, 3000
 
@@ -439,7 +442,7 @@ screwJandelOrRoblox() {
 
 startUINav() {
     SendInput, {%uiNavKeybind%}
-    Sleep, 50
+    Sleep, %sleepPerf%
 }
 
 tooltipLog(message, duration := 3000) {
@@ -488,7 +491,7 @@ keyEncoder(str) {
 repeatKey(key, count := 1) {
     Loop, %count% {
         SendInput, {%key%}
-        Sleep, 50
+        Sleep, %sleepPerf%
     }
 }
 
@@ -630,9 +633,9 @@ ShowGui:
     Gui, Add, Text, x460 y0 w30 h30 vMinBtn gMinimize Center hwndMinimize
     GuiControl,, MinBtn, _
     GuiControl, +BackgroundFFAA00, MinBtn
-    Gui, Show, w520 h430, Cobalt v2.1a 
+    Gui, Show, w520 h430, Cobalt v2.1a
     Sleep, 100
-    WinGet, hwnd, ID, Cobalt v2.1a 
+    WinGet, hwnd, ID, Cobalt v2.1a
     style := DllCall("GetWindowLong", "Ptr", hwnd, "Int", -16, "UInt")
     style := style & ~0xC00000 & ~0x800000 & ~0x100000 & ~0x40000
     DllCall("SetWindowLong", "Ptr", hwnd, "Int", -16, "UInt", style)
@@ -712,12 +715,18 @@ ShowGui:
     Gui, Add, Text, x50 y125 w150 h30, Private Server Link
     Gui, Add, Text, x50 y155 w150 h30, Webhook URL
     Gui, Add, Text, x50 y185 w150 h30, Discord User ID
+    Gui, Add, Text, x50 y235 w150 h30, Device Performance
     Gui, Font, s6 cGray, Segoe UI
-    Gui, Add, Link, x50 y205 w200 h30, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
+    Gui, Add, Link, x50 y205 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
     Gui, Font, s8 cBlack, Segoe UI
     Gui, Add, Edit, r1 vprivateServerLink w185 x315 y125, % privateServerLink
     Gui, Add, Edit, r1 vwebhookURL w185 x315 y155, % webhookURL
     Gui, Add, Edit, r1 vdiscordID w185 x315 y185, % discordID
+
+    choiceIndex := indexOf(["Supercomputer (do not use)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
+    Gosub, UpdatePerfSetting
+    
+    Gui, Add, DropDownList, w185 x315 y235 vperfSetting gUpdatePerfSetting Choose%choiceIndex%, Supercomputer (do not use)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui, Add, Button, h30 w135 x365 y300 gUpdatePlayerValues, Save Settings
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
@@ -743,8 +752,25 @@ ShowGui:
     Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
+UpdatePerfSetting:
+    if (perfSetting = "Modern PC (stable FPS on high)") {
+        sleepPerf := 50
+    } else if (perfSetting = "Default") {
+        sleepPerf := 100
+    } else if (perfSetting = "Chromebook (cannot get stable FPS)") {
+        sleepPerf := 150
+    } else if (perfSetting = "Atari 2600 (bless your soul)") {
+        sleepPerf := 200
+    } else if (perfSetting = "Supercomputer (do not use)") {
+        sleepPerf := 0
+    } else {
+        sleepPerf := 100 ; default back so that the weird bug does not appear
+    }
+Return
+
 UpdatePlayerValues:
     Gui, Submit, NoHide
+
     privateServerLink := Trim(privateServerLink)
     webhookURL := Trim(webhookURL)
     discordID := Trim(discordID)
@@ -764,6 +790,11 @@ UpdatePlayerValues:
         return
     }
 
+    if (perfSetting = "") {
+        MsgBox, 48, Error, Device Performance cannot be empty!
+        return
+    }
+
     saveValues()
     MsgBox, 64, Success, Settings saved successfully!
 Return
@@ -772,6 +803,7 @@ loadValues() {
     IniRead, webhookURL, config.ini, PlayerConf, webhookURL
     IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink
     IniRead, discordID, config.ini, PlayerConf, discordID
+    IniRead, perfSetting, config.ini, PlayerConf, perfSetting
 
     IniRead, currentlyAllowedSeedsStr, config.ini, PersistentData, currentlyAllowedSeeds
     IniRead, currentlyAllowedGearStr, config.ini, PersistentData, currentlyAllowedGear
@@ -798,6 +830,7 @@ saveValues() {
     IniWrite, %privateServerLink%, config.ini, PlayerConf, privateServerLink
     IniWrite, %webhookURL%, config.ini, PlayerConf, webhookURL
     IniWrite, %discordID%, config.ini, PlayerConf, discordID
+    IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
 
     currentlyAllowedSeedsStr := arrayToString(currentlyAllowedSeeds)
     currentlyAllowedGearStr := arrayToString(currentlyAllowedGear)

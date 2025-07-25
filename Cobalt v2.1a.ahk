@@ -764,7 +764,7 @@ UpdatePerfSetting:
     } else if (perfSetting = "Supercomputer (do not use)") {
         sleepPerf := 0
     } else {
-        MsgBox, 48, Error, Invalid Device Performance setting!
+        sleepPerf := 100 ; default back so that the weird bug does not appear
     }
 Return
 

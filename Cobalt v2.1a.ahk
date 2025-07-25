@@ -41,7 +41,7 @@ global canDoEgg := true
 global started := 0
 global messageQueue := []
 global sleepPerf := 200
-global perfSetting := "Modern PC (stable FPS on high)"
+global perfSetting := "Default"
 
 WinActivate, ahk_exe RobloxPlayerBeta.exe
 
@@ -723,9 +723,10 @@ ShowGui:
     Gui, Add, Edit, r1 vwebhookURL w185 x315 y155, % webhookURL
     Gui, Add, Edit, r1 vdiscordID w185 x315 y185, % discordID
 
-    choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Older Laptop (stable FPS on low)", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
-
-    Gui, Add, DropDownList, w185 x315 y235 vperfSetting Choose%choiceIndex%), Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Older Laptop (stable FPS on low)|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
+    choiceIndex := indexOf(["Supercomputer (do not use)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
+    Gosub, UpdatePerfSetting
+    
+    Gui, Add, DropDownList, w185 x315 y235 vperfSetting gUpdatePerfSetting Choose%choiceIndex%, Supercomputer (do not use)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui, Add, Button, h30 w135 x365 y300 gUpdatePlayerValues, Save Settings
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
@@ -751,6 +752,22 @@ ShowGui:
     Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
+UpdatePerfSetting:
+    if (perfSetting = "Modern PC (stable FPS on high)") {
+        sleepPerf := 50
+    } else if (perfSetting = "Default") {
+        sleepPerf := 100
+    } else if (perfSetting = "Chromebook (cannot get stable FPS)") {
+        sleepPerf := 150
+    } else if (perfSetting = "Atari 2600 (bless your soul)") {
+        sleepPerf := 200
+    } else if (perfSetting = "Supercomputer (do not use)") {
+        sleepPerf := 0
+    } else {
+        MsgBox, 48, Error, Invalid Device Performance setting!
+    }
+Return
+
 UpdatePlayerValues:
     Gui, Submit, NoHide
 
@@ -775,21 +792,6 @@ UpdatePlayerValues:
 
     if (perfSetting = "") {
         MsgBox, 48, Error, Device Performance cannot be empty!
-        return
-    }
-
-    if (perfSetting = "Modern PC (stable FPS on high)") {
-        sleepPerf := 50
-    } else if (perfSetting = "Older Laptop (stable FPS on low)") {
-        sleepPerf := 100
-    } else if (perfSetting = "Chromebook (cannot get stable FPS)") {
-        sleepPerf := 150
-    } else if (perfSetting = "Atari 2600 (bless your soul)") {
-        sleepPerf := 200
-    } else if (perfSetting = "Supercomputer (Doesnt work, for fun)") {
-        sleepPerf := 0
-    } else {
-        MsgBox, 48, Error, Invalid Device Performance setting!
         return
     }
 

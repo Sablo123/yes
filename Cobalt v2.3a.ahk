@@ -1,6 +1,7 @@
-; Cobalt v2.1a
-
 #SingleInstance, force
+
+; Clovalt change this for updates :heart:
+global version := "v2.3a"
 
 global privateServerLink := ""
 global webhookURL := ""
@@ -14,7 +15,7 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange
     , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
-    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed"]
+    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Elder Strawberry"]
 
 ; Edit this to change the gear
 global gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler","Medium Toy","Medium Treat"
@@ -61,24 +62,16 @@ Alignment:
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
     startUINav()
-    ; RE - open backpack
-    ; RRR - go to garden
-    ; DDE - get to box and enter
-    keyEncoder("ULLULLULLULLULLULL")
-    keyEncoder("RWEWRRRDURE")
+    keyEncoder("REDDDDE")
     startUINav()
-    repeatKey("Esc")
-    sleep, 10
-    repeatKey("Esc")
+    repeatKey("Esc", 2)
     Sleep, 500
     startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
-    keyEncoder("RWERWRWRDWDRWRWRWUWUWUE")
+    keyEncoder("REDDDE")
     typeString("recall")
-    keyEncoder("EWDWUWUWEWEWDWRWE")
+    keyEncoder("EDDDUUEWDRE")
     ; close it
-    SendInput, ``
-    Sleep, %sleepPerf% ; idk how to write this so it works with repeat key
+    Send, ``
     tooltipLog("Aligning camera...")
     recalibrateCameraDistance()
 
@@ -116,9 +109,8 @@ Alignment:
     repeatKey("Esc")
     sleep, 500
     startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
     sleep, 500
-    keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
+    keyEncoder("DRELERRELELERRELELERRE")
     startUINav()
     repeatKey("Esc")
     sleep, 100
@@ -139,10 +131,8 @@ SeedCycle:
 
     startUINav()
     ;open shop
-    screwJandelOrRoblox()
     sleep, 1000
-    keyEncoder("RRREDDD")
-    sleep, 100
+    keyEncoder("RRREDDDW")
     SendInput, e
     Sleep, 3000
     repeatKey("Up", 40)
@@ -176,7 +166,7 @@ GearCycle:
     }
 
     tooltipLog("Opening gear shop...")
-    repeatKey("E")
+    SendInput, e
     Sleep, 3000
 
     Loop, 5 {
@@ -215,13 +205,12 @@ EggCycle:
         SendInput, {W Down}
         Sleep, 600
         SendInput, {W Up}
-        Sleep, %sleepPerf%
         SendInput, e
         Sleep, 3000
 
         Loop, 5 {
             Send, {WheelUp}
-            Sleep, 10
+            Sleep, %sleepPerf%
         }
         Sleep, 500
 
@@ -337,9 +326,11 @@ getMouseCoord(axis) {
 }
 
 goShopping(arr, allArr, spamCount := 50) {
-    screwJandelOrRoblox()
-    keyEncoder("DRWWEEWW")
-
+    startUINav()
+    startUINav()
+    startUINav()
+    startUINav()
+    keyEncoder("DD")
     for index, item in allArr {
         if(!contains(arr, item)) {
             repeatKey("Down")
@@ -351,17 +342,18 @@ goShopping(arr, allArr, spamCount := 50) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LUDRE")
+    keyEncoder("DDUE")
 }
 
 goShoppingEgg(arr, allArr) {
-    screwJandelOrRoblox()
-    keyEncoder("DR")
-    repeatKey("Up", 40)
-    keyEncoder("RW")
+    startUINav()
+    startUINav()
+    startUINav()
+    startUINav()
+    keyEncoder("DD")
     for index, item in allArr {
         if(!contains(arr, item)) {
-            repeatKey("Down")
+            repeatKey("Down", 2)
             Continue
         }
         buyAllAvailableEgg(5, item)
@@ -370,7 +362,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LLLLURRRRRDEE")
+    keyEncoder("RRRDE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
@@ -378,7 +370,6 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Down")
     Sleep, 200
     if(isThereStock()) {
-        repeatKey("Left")
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
@@ -387,7 +378,7 @@ buyAllAvailable(spamCount := 50, item := "") {
 
 buyAllAvailableEgg(spamCount := 50, item := "") {
     repeatKey("Enter")
-    repeatKey("Down")
+    repeatKey("Down", 2)
     Sleep, 200
     if(isThereStock()) {
         repeatKey("Enter", spamCount)
@@ -395,7 +386,6 @@ buyAllAvailableEgg(spamCount := 50, item := "") {
     }
     repeatKey("Down")
 }
-
 isThereStock() {
     return colorDetect(0x20b41c)
 }
@@ -436,13 +426,9 @@ colorDetect(c) {
     return false
 }
 
-screwJandelOrRoblox() {
-    keyEncoder("ULLULLULLULLULLULLULLULLULLULLULLULLULLULLULLULL")
-}
-
 startUINav() {
     SendInput, {%uiNavKeybind%}
-    Sleep, %sleepPerf%
+    Sleep, 50
 }
 
 tooltipLog(message, duration := 3000) {
@@ -531,7 +517,7 @@ typeString(string) {
 
 insertByReferenceOrder(targetList, value, referenceList) {
     refIndex := indexOf(referenceList, value)
-    if (refIndex = -1) ; reference doesn't exist, if you get here we have issues
+    if (refIndex = -1) ; reference doesn't exist, if you get here, we have issues
         return
 
     insertPos := 0
@@ -626,16 +612,16 @@ ShowGui:
     Gui, +Caption +SysMenu +MinimizeBox +Resize
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt v2.1 ALPHA
+    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt %version%
     Gui, Add, Text, x490 y0 w30 h30 vCloseBtn gClose Center hwndhCloseBtn
     GuiControl,, CloseBtn, X
     GuiControl, +BackgroundFF4444, CloseBtn
     Gui, Add, Text, x460 y0 w30 h30 vMinBtn gMinimize Center hwndMinimize
     GuiControl,, MinBtn, _
     GuiControl, +BackgroundFFAA00, MinBtn
-    Gui, Show, w520 h430, Cobalt v2.1a
+    Gui, Show, w520 h430, Cobalt %version%
     Sleep, 100
-    WinGet, hwnd, ID, Cobalt v2.1a
+    WinGet, hwnd, ID, Cobalt %version%
     style := DllCall("GetWindowLong", "Ptr", hwnd, "Int", -16, "UInt")
     style := style & ~0xC00000 & ~0x800000 & ~0x100000 & ~0x40000
     DllCall("SetWindowLong", "Ptr", hwnd, "Int", -16, "UInt", style)
@@ -660,7 +646,7 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c1C96EF vCheckAllSeeds gToggleAllSeeds, Select All Seeds
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX +25
+    paddingX := groupBoxX +35
     Loop % seedItems.Length() {
         row := Mod(A_Index - 1, Ceil(seedItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(seedItems.Length() / cols))
@@ -668,7 +654,7 @@ ShowGui:
         y := paddingY + (itemH * row)
         seed := seedItems[A_Index]
         isChecked := contains(currentlyAllowedSeeds, seed) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateSeedState vseedCheckboxes%A_Index% Checked%isChecked%, % seed
+        Gui, Add, Checkbox, x%x% y%y% w143 h23 gUpdateSeedState vseedCheckboxes%A_Index% Checked%isChecked%, % seed
     }
 
     Gui, Tab, Gear
@@ -715,19 +701,17 @@ ShowGui:
     Gui, Add, Text, x50 y125 w150 h30, Private Server Link
     Gui, Add, Text, x50 y155 w150 h30, Webhook URL
     Gui, Add, Text, x50 y185 w150 h30, Discord User ID
-    Gui, Add, Text, x50 y235 w150 h30, Device Performance
+    Gui, Add, Text, x50 y235 w150 h30, Performance Setting
     Gui, Font, s6 cGray, Segoe UI
     Gui, Add, Link, x50 y205 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
     Gui, Font, s8 cBlack, Segoe UI
-    Gui, Add, Edit, r1 vprivateServerLink w185 x315 y125, % privateServerLink
-    Gui, Add, Edit, r1 vwebhookURL w185 x315 y155, % webhookURL
-    Gui, Add, Edit, r1 vdiscordID w185 x315 y185, % discordID
-
-    choiceIndex := indexOf(["Supercomputer (do not use)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
+    Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y125, % privateServerLink
+    Gui, Add, Edit, gUpdatePlayerValues r1 vwebhookURL w185 x315 y155, % webhookURL
+    Gui, Add, Edit, gUpdatePlayerValues r1 vdiscordID w185 x315 y185, % discordID
+    choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
-    
-    Gui, Add, DropDownList, w185 x315 y235 vperfSetting gUpdatePerfSetting Choose%choiceIndex%, Supercomputer (do not use)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
-    Gui, Add, Button, h30 w135 x365 y300 gUpdatePlayerValues, Save Settings
+
+    Gui, Add, DropDownList, w185 x315 y235 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
@@ -736,7 +720,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
     Gui, Font, s10 cWhite w600, Segoe UI
-    Gui, Add, Text, x50 y110 w330 h30, Cobalt v2.1 ALPHA by Clovalt, Cobblestone
+    Gui, Add, Text, x50 y110 w330 h30, Cobalt %version% by Clovalt, Cobblestone
     Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
     Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
     Gui, Add, Picture, x250 y150 w100 h100, images/clovalt.png
@@ -745,7 +729,6 @@ ShowGui:
     Gui, Add, Text, x50 y270 w150 h100, Macro Developer
     Gui, Font, s8 cBlue, Segoe UI
     Gui, Add, Text, x250 y270 w150 h100, Macro Developer and Project Lead
-    Gui, Font, s8 cBlue, Segoe UI
     Gui, Add, Link, x50 y310 w150 h30, <a href="https://madefrom.rocks">Website</a>
     Gui, Add, Link, x50 y330 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
     Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/qsJ4mT3C4Z">Main Discord Server</a>
@@ -753,19 +736,22 @@ ShowGui:
 return
 
 UpdatePerfSetting:
-    if (perfSetting = "Modern PC (stable FPS on high)") {
+    Gui, Submit, NoHide
+    perfMode := StrSplit(perfSetting, " ")[1]
+    if (perfMode = "Modern") {
         sleepPerf := 50
-    } else if (perfSetting = "Default") {
+    } else if (perfMode = "Default") {
         sleepPerf := 100
-    } else if (perfSetting = "Chromebook (cannot get stable FPS)") {
+    } else if (perfMode = "Chromebook") {
         sleepPerf := 150
-    } else if (perfSetting = "Atari 2600 (bless your soul)") {
+    } else if (perfMode = "Atari") {
         sleepPerf := 200
-    } else if (perfSetting = "Supercomputer (do not use)") {
+    } else if (perfMode = "Supercomputer") {
         sleepPerf := 0
     } else {
-        sleepPerf := 100 ; default back so that the weird bug does not appear
+        sleepPerf := 100
     }
+    saveValues()
 Return
 
 UpdatePlayerValues:
@@ -775,28 +761,15 @@ UpdatePlayerValues:
     webhookURL := Trim(webhookURL)
     discordID := Trim(discordID)
 
-    if (privateServerLink = "") {
-        MsgBox, 48, Error, Private Server Link cannot be empty!
-        return
+    if(RegExMatch(discordID, "\D")) {
+        tooltipLog("Your Discord ID must only contain numbers")
     }
 
-    if (webhookURL = "") {
-        MsgBox, 48, Error, Webhook URL cannot be empty!
-        return
-    }
-
-    if (discordID = "") {
-        MsgBox, 48, Error, Discord User ID cannot be empty!
-        return
-    }
-
-    if (perfSetting = "") {
-        MsgBox, 48, Error, Device Performance cannot be empty!
-        return
+    if(privateServerLink = "") {
+        tooltipLog("If you want to rejoin on error, you must provide a private server link")
     }
 
     saveValues()
-    MsgBox, 64, Success, Settings saved successfully!
 Return
 
 loadValues() {

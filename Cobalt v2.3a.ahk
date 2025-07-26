@@ -387,6 +387,7 @@ buyAllAvailableEgg(spamCount := 50, item := "") {
     repeatKey("Down")
 }
 isThereStock() {
+    Sleep, %sleepPerf%
     return colorDetect(0x20b41c)
 }
 
@@ -406,9 +407,9 @@ isShopOpen() {
 
 colorDetect(c) {
     startXPercent := 42
-    startYPercent := 25
+    startYPercent := 23
     endXPercent := 70
-    endYPercent := 75
+    endYPercent := 77
 
     CoordMode, Pixel, Screen
 

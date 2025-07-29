@@ -803,7 +803,7 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c1C96EF vCheckAllSeeds gToggleAllSeeds, Select All Seeds
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX +35
+    paddingX := groupBoxX +25.5
     Loop % seedItems.Length() {
         row := Mod(A_Index - 1, Ceil(seedItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(seedItems.Length() / cols))

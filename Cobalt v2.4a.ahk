@@ -1,6 +1,6 @@
-; Cobalt v2.1a
-
 #SingleInstance, force
+
+global version := "v2.4a"
 
 global privateServerLink := ""
 global webhookURL := ""
@@ -14,7 +14,7 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange
     , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
-    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed"]
+    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed","Elder Strawberry"]
 
 ; Edit this to change the gear
 global gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler","Medium Toy","Medium Treat"
@@ -24,6 +24,8 @@ global gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler
 global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg", "Mythical Egg", "Paradise Egg"
     ,"Bug Egg"]
 
+global eventItems := ["Zen Seed Pack", "Zen Egg", "Hot Spring", "Zen Sand", "Tranquil Radar","Corrupt Radar", "Zenflare", "Zen Crate","Sakura Bush", "Soft Sunshine", "Koi", "Zen Gnome Crate", "Spiked Mango", "Pet Shard Tranquil", "Pet Shard Corrupt", "Raiju"]
+
 ; Edit this to change what you want to be pinged for
 global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Master Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
 
@@ -32,16 +34,26 @@ global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud"
 global currentlyAllowedSeeds := []
 global currentlyAllowedGear := []
 global currentlyAllowedEggs := []
+global currentlyAllowedEvent := []
+
+global scrollCount
+scrollCount := {}
+scrollCount["Zen Seed Pack"] := 2
+scrollCount["Zen Egg"] := 2
+scrollCount["Zen Crate"] := 2
+scrollCount["Zen Gnome Crate"] := 2
 
 global finished := true
 global cycleCount := 0
 global eggCounter := 0
 global canDoEgg := true
+global canDoEvent := true
+global imBroke := false
 
 global started := 0
 global messageQueue := []
 global sleepPerf := 200
-global perfSetting := "Default"
+global perfSetting := "Modern PC (stable FPS on high)"
 
 WinActivate, ahk_exe RobloxPlayerBeta.exe
 
@@ -64,21 +76,18 @@ Alignment:
     ; RE - open backpack
     ; RRR - go to garden
     ; DDE - get to box and enter
-    keyEncoder("ULLULLULLULLULLULL")
-    keyEncoder("RWEWRRRDURE")
+    keyEncoder("REDDDDE")
     startUINav()
     repeatKey("Esc")
     sleep, 10
     repeatKey("Esc")
     Sleep, 500
     startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
-    keyEncoder("RWERWRWRDWDRWRWRWUWUWUE")
+    keyEncoder("REDDDE")
     typeString("recall")
-    keyEncoder("EWDWUWUWEWEWDWRWE")
+    keyEncoder("EDDDUUEWDRE")
     ; close it
-    SendInput, ``
-    Sleep, %sleepPerf% ; idk how to write this so it works with repeat key
+    Send, ``
     tooltipLog("Aligning camera...")
     recalibrateCameraDistance()
 
@@ -116,9 +125,8 @@ Alignment:
     repeatKey("Esc")
     sleep, 500
     startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
     sleep, 500
-    keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
+    keyEncoder("DRELERRELELERRELELERRE")
     startUINav()
     repeatKey("Esc")
     sleep, 100
@@ -133,13 +141,12 @@ Alignment:
 SeedCycle:
     exitIfWindowDies()
     if (currentlyAllowedSeeds.Length() = 0) {
-        Gosub, TPToGear
+        Gosub, GearCycle
         Return
     }
 
     startUINav()
     ;open shop
-    screwJandelOrRoblox()
     sleep, 1000
     keyEncoder("RRREDDD")
     sleep, 100
@@ -155,28 +162,20 @@ SeedCycle:
     } else {
         tooltipLog("Error: Seed shop did not open")
         sendDiscordMessage("Seed shop did not open! Reconnecting...", 16711680)
-        Gosub, Reconnect
+        reconnect()
     }
-
-TPToGear:
-    tooltipLog("Going to gear shop...")
-    Send, {2}
-    SafeMoveRelative(0.5, 0.5)
-    MouseClick, Left
-    Sleep, 400
-    Send, {2}
-    Sleep, 400
 
 GearCycle:
     exitIfWindowDies()
-    ; TODO when the gear shop is disabled but egg is still enabled, handle them differently
-    If (gearItems.Length() = 0) {
+    if (currentlyAllowedGear.Length() = 0) {
         Gosub, EggCycle
         Return
     }
 
+    tpToGear()
+
     tooltipLog("Opening gear shop...")
-    repeatKey("E")
+    SendInput, e
     Sleep, 3000
 
     Loop, 5 {
@@ -200,22 +199,30 @@ GearCycle:
         goShopping(currentlyAllowedGear, gearItems, 20)
         sendDiscordQueue("Gear Shop")
         startUINav()
+        Sleep, 100
+        Loop, 5 {
+            Send, {WheelDown}
+            Sleep, 10
+        }
     } else {
         tooltipLog("Error: Gear shop did not open")
         sendDiscordMessage("Gear shop did not open! Reconnecting...", 16711680)
-        Gosub, Reconnect
+        reconnect()
     }
 
 EggCycle:
     exitIfWindowDies()
+    if(currentlyAllowedGear.Length() = 0 && currentlyAllowedEggs.Length() > 0) {
+        tpToGear()
+    }
+
     if(currentlyAllowedEggs.Length() > 0 && canDoEgg) {
         canDoEgg := false
         tooltipLog("Going to egg shop...")
         recalibrateCameraDistance()
-        SendInput, {W Down}
+        SendInput, {w Down}
         Sleep, 600
-        SendInput, {W Up}
-        Sleep, %sleepPerf%
+        SendInput, {w Up}
         SendInput, e
         Sleep, 3000
 
@@ -236,12 +243,88 @@ EggCycle:
             sendDiscordQueue("Egg Shop")
             Sleep, 500
             startUINav()
+            Loop, 5 {
+                Send, {WheelDown}
+                Sleep, 10
+            }
+            Sleep, 500
         } else {
             tooltipLog("Error: Egg shop did not open")
             sendDiscordMessage("Egg shop did not open! Reconnecting...", 16711680)
-            Gosub, Reconnect
+            reconnect()
         }
     }
+
+EventCycle:
+    exitIfWindowDies()
+    if(imBroke) {
+        Gosub, WaitForNextCycle ; you cant afford it lil bro
+        Return
+    }
+
+    if(currentlyAllowedEvent.Length() > 0 && canDoEvent) {
+        canDoEvent := false
+        tooltipLog("Going to Event Shop")
+        sleep, 30
+        startUINav()
+        keyEncoder("DRRE")
+        Sleep, %perfSleep%
+        startUINav()
+        SendInput, {d Down}
+        Sleep, 7000
+        SendInput, {d Up}
+        Sleep, %perfSleep%
+        SendInput, {w Down}
+        Sleep, 700
+        SendInput, {w Up}
+        Sleep, 100
+        SendInput, {d Down}
+        Sleep, 1900
+        SendInput, {d Up}
+        Sleep, %perfSleep%
+        SendInput, {s Down}
+        Sleep, 2200
+        SendInput, {s Up}
+        Sleep, %perfSleep%
+        SendInput, {a Down}
+        Sleep, 900
+        SendInput, {a Up}
+        Sleep, %perfSleep%
+        SendInput, {s Down}
+        Sleep, 30
+        SendInput, {s Up}
+        Sleep, %sleepPerf%
+        tooltipLog("Opening event shop...")
+        SendInput, e
+        Sleep, 3000
+        Click
+        sleep, 10
+        Loop, 5 {
+            Send, {WheelUp}
+            Sleep, 10
+        }
+
+        Sleep, 500
+
+        SafeMoveRelative(0.80, 0.29)
+        MouseClick, Left
+        Sleep 3000
+
+        if(isShopOpen()) {
+            startUINav()
+            tooltipLog("Shopping for event items...")
+            goShoppingEvent(currentlyAllowedEvent, eventItems)
+            sendDiscordQueue("Event Shop")
+            Sleep, 500
+            startUINav()
+        } else {
+            tooltipLog("Error: Event shop did not open")
+            sendDiscordMessage("Event shop did not open! Reconnecting...", 16711680)
+            reconnect()
+        }
+    }
+
+WaitForNextCycle:
     SafeMoveRelative(0.5, 0.5)
     finished := true
     cycleCount += 1
@@ -249,20 +332,30 @@ EggCycle:
     sendDiscordMessage("Cycle " . cycleCount . " finished", 65280)
 Return
 
-Reconnect:
+tpToGear() {
+    tooltipLog("Going to gear shop...")
+    Send, {2}
+    SafeMoveRelative(0.5, 0.5)
+    MouseClick, Left
+    Sleep, 400
+    Send, {2}
+    Sleep, 400
+}
+
+reconnect() {
     WinClose, ahk_exe RobloxPlayerBeta.exe
     Sleep, 1000
     WinClose, ahk_exe RobloxPlayerBeta.exe
     Sleep, 3000
     Run, %privateServerLink%
     Sleep, 45000
-    SendInput, {Tab}
+    SendInput, {tab}
     Sleep, 1000
     SafeClickRelative(0.5, 0.5)
     Sleep, 15000
     Gosub, Alignment
     sendDiscordMessage("Reconnected to the game!", 65280)
-Return
+}
 
 exitIfWindowDies() {
     if(!WinExist("ahk_exe RobloxPlayerBeta.exe")) {
@@ -271,27 +364,39 @@ exitIfWindowDies() {
 }
 
 ShowTimeTip:
+
     SecondsUntil5 := 300 - (Mod(A_Min, 5) * 60 + A_Sec)
     SecondsUntil5 := Mod(SecondsUntil5, 301)
     RemainingMins5 := Floor(SecondsUntil5 / 60)
     RemainingSecs5 := Mod(SecondsUntil5, 60)
     FormattedTime5 := Format("{:02}:{:02}", RemainingMins5, RemainingSecs5)
+
     SecondsUntil30 := 1800 - (Mod(A_Min, 30) * 60 + A_Sec)
     SecondsUntil30 := Mod(SecondsUntil30, 1801)
     RemainingMins30 := Floor(SecondsUntil30 / 60)
     RemainingSecs30 := Mod(SecondsUntil30, 60)
     FormattedTime30 := Format("{:02}:{:02}", RemainingMins30, RemainingSecs30)
 
-    ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%
+    SecondsUntilHour := 3600 - (Mod(A_Hour * 60 + A_Min, 60) * 60 + A_Sec)
+    SecondsUntilHour := Mod(SecondsUntilHour, 3601)
+    RemainingMins60 := Floor(SecondsUntilHour / 60)
+    RemainingSecs60 := Mod(SecondsUntilHour, 60)
+    FormattedTime60 := Format("{:02}:{:02}", RemainingMins60, RemainingSecs60)
 
-    if(SecondsUntil30 < 3) {
+    ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%`nNext Event Shop in %FormattedTime60%
+
+    if (SecondsUntil30 < 3) {
         canDoEgg := true
     }
 
-    if(SecondsUntil5 < 3) {
+    if (SecondsUntil5 < 3) {
         finished := false
         recalibrateCameraDistance()
         Gosub, Alignment
+    }
+
+    if (SecondsUntil60 < 3) {
+        canDoEvent := true
     }
 
 Return
@@ -337,10 +442,13 @@ getMouseCoord(axis) {
 }
 
 goShopping(arr, allArr, spamCount := 50) {
-    screwJandelOrRoblox()
-    keyEncoder("DRWWEEWW")
-
+    startUINav()
+    startUINav()
+    startUINav()
+    startUINav()
+    keyEncoder("DD")
     for index, item in allArr {
+
         if(!contains(arr, item)) {
             repeatKey("Down")
             Continue
@@ -351,17 +459,39 @@ goShopping(arr, allArr, spamCount := 50) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LUDRE")
+    keyEncoder("DDUE")
+}
+
+goShoppingEvent(arr, allArr, spamCount := 50) {
+    startUINav()
+    startUINav()
+    startUINav()
+    startUINav()
+    keyEncoder("DD")
+    for index, item in allArr {
+        scrollDepth := scrollCount.HasKey(item) ? scrollCount[item] : 1
+        if(!contains(arr, item)) {
+            repeatKey("Down", scrollDepth)
+            Continue
+        }
+        buyAllAvailableEvent(spamCount, item)
+    }
+    if(messageQueue.Length() = 0) {
+        messageQueue.Push("Bought nothing...")
+    }
+    repeatKey("Up", 40)
+    keyEncoder("RRRRRUWE")
 }
 
 goShoppingEgg(arr, allArr) {
-    screwJandelOrRoblox()
-    keyEncoder("DR")
-    repeatKey("Up", 40)
-    keyEncoder("RW")
+    startUINav()
+    startUINav()
+    startUINav()
+    startUINav()
+    keyEncoder("DD")
     for index, item in allArr {
         if(!contains(arr, item)) {
-            repeatKey("Down")
+            repeatKey("Down", 2)
             Continue
         }
         buyAllAvailableEgg(5, item)
@@ -370,7 +500,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LLLLURRRRRDEE")
+    keyEncoder("RRRDE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
@@ -378,16 +508,15 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Down")
     Sleep, 200
     if(isThereStock()) {
-        repeatKey("Left")
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
     repeatKey("Down")
 }
 
-buyAllAvailableEgg(spamCount := 50, item := "") {
+buyAllAvailableEgg(spamCount := 10, item := "") {
     repeatKey("Enter")
-    repeatKey("Down")
+    repeatKey("Down", 2)
     Sleep, 200
     if(isThereStock()) {
         repeatKey("Enter", spamCount)
@@ -396,11 +525,29 @@ buyAllAvailableEgg(spamCount := 50, item := "") {
     repeatKey("Down")
 }
 
+buyAllAvailableEvent(spamCount := 10, item := "") {
+    scrollDepth := scrollCount.HasKey(item) ? scrollCount[item] : 1
+    repeatKey("Enter")
+    repeatKey("Down", scrollDepth)
+    Sleep, 200
+
+    if(isThereStock()) {
+        repeatKey("Enter", spamCount)
+        messageQueue.Push("Bought " . item . "!")
+    }
+    if(isThereStock()) { ; if theres still stock afterwards then ur broke
+        imBroke = true ; womp womp
+    }
+    repeatKey("Down")
+}
+
 isThereStock() {
+    Sleep, 50
     return colorDetect(0x20b41c)
 }
 
 isShopOpen() {
+    Sleep, 50
     ; every other shop
     if(colorDetect(0x50240c)) {
         return true
@@ -430,6 +577,7 @@ colorDetect(c) {
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
     PixelSearch, px, py, x1, y1, x2, y2, c, 10, Fast RGB
+    ; MouseMove, px, py ; uncomment to test colo(u)r detection
     if(ErrorLevel = 0) {
         return true
     }
@@ -442,7 +590,7 @@ screwJandelOrRoblox() {
 
 startUINav() {
     SendInput, {%uiNavKeybind%}
-    Sleep, %sleepPerf%
+    Sleep, 50
 }
 
 tooltipLog(message, duration := 3000) {
@@ -626,16 +774,16 @@ ShowGui:
     Gui, +Caption +SysMenu +MinimizeBox +Resize
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt v2.1 ALPHA
+    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt %version%
     Gui, Add, Text, x490 y0 w30 h30 vCloseBtn gClose Center hwndhCloseBtn
     GuiControl,, CloseBtn, X
     GuiControl, +BackgroundFF4444, CloseBtn
     Gui, Add, Text, x460 y0 w30 h30 vMinBtn gMinimize Center hwndMinimize
     GuiControl,, MinBtn, _
     GuiControl, +BackgroundFFAA00, MinBtn
-    Gui, Show, w520 h430, Cobalt v2.1a
+    Gui, Show, w520 h430, Cobalt %version%
     Sleep, 100
-    WinGet, hwnd, ID, Cobalt v2.1a
+    WinGet, hwnd, ID, Cobalt %version%
     style := DllCall("GetWindowLong", "Ptr", hwnd, "Int", -16, "UInt")
     style := style & ~0xC00000 & ~0x800000 & ~0x100000 & ~0x40000
     DllCall("SetWindowLong", "Ptr", hwnd, "Int", -16, "UInt", style)
@@ -651,7 +799,7 @@ ShowGui:
     groupBoxW := 490
     groupBoxH := 320
 
-    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Settings|Credits
+    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Event|Settings|Credits
 
     Gui, Tab, Seeds
     Gui, Font, s10
@@ -708,6 +856,25 @@ ShowGui:
         Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateEggState veggCheckboxes%A_Index% Checked%isChecked%, % egg
     }
 
+    Gui, Tab, Event
+    Gui, Font, s10
+    Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
+
+    Gui, Add, Checkbox, x55 y105 w150 h23 vCheckAllEvent gToggleAllEvent cEA6653, Select All Event Items
+
+    paddingY := groupBoxY + 50
+    paddingX := groupBoxX + 25
+    cols := 2
+    Loop % eventItems.Length() {
+        row := Mod(A_Index - 1, Ceil(eventItems.Length() / cols))
+        col := Floor((A_Index - 1) / Ceil(eventItems.Length() / cols))
+        x := paddingX + (itemW * col)
+        y := paddingY + (itemH * row)
+        event := eventItems[A_Index]
+        isChecked := contains(currentlyAllowedEvent, event) ? 1 : 0
+        Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateEventState veventCheckboxes%A_Index% Checked%isChecked%, % event
+    }
+
     Gui, Tab, Settings
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
@@ -715,19 +882,17 @@ ShowGui:
     Gui, Add, Text, x50 y125 w150 h30, Private Server Link
     Gui, Add, Text, x50 y155 w150 h30, Webhook URL
     Gui, Add, Text, x50 y185 w150 h30, Discord User ID
-    Gui, Add, Text, x50 y235 w150 h30, Device Performance
+    Gui, Add, Text, x50 y235 w150 h30, Performance Setting
     Gui, Font, s6 cGray, Segoe UI
     Gui, Add, Link, x50 y205 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
     Gui, Font, s8 cBlack, Segoe UI
-    Gui, Add, Edit, r1 vprivateServerLink w185 x315 y125, % privateServerLink
-    Gui, Add, Edit, r1 vwebhookURL w185 x315 y155, % webhookURL
-    Gui, Add, Edit, r1 vdiscordID w185 x315 y185, % discordID
-
-    choiceIndex := indexOf(["Supercomputer (do not use)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
+    Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y125, % privateServerLink
+    Gui, Add, Edit, gUpdatePlayerValues r1 vwebhookURL w185 x315 y155, % webhookURL
+    Gui, Add, Edit, gUpdatePlayerValues r1 vdiscordID w185 x315 y185, % discordID
+    choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
-    
-    Gui, Add, DropDownList, w185 x315 y235 vperfSetting gUpdatePerfSetting Choose%choiceIndex%, Supercomputer (do not use)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
-    Gui, Add, Button, h30 w135 x365 y300 gUpdatePlayerValues, Save Settings
+
+    Gui, Add, DropDownList, w185 x315 y235 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
@@ -736,7 +901,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
     Gui, Font, s10 cWhite w600, Segoe UI
-    Gui, Add, Text, x50 y110 w330 h30, Cobalt v2.1 ALPHA by Clovalt, Cobblestone
+    Gui, Add, Text, x50 y110 w330 h30, Cobalt %version% by Clovalt, Cobblestone
     Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
     Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
     Gui, Add, Picture, x250 y150 w100 h100, images/clovalt.png
@@ -745,7 +910,6 @@ ShowGui:
     Gui, Add, Text, x50 y270 w150 h100, Macro Developer
     Gui, Font, s8 cBlue, Segoe UI
     Gui, Add, Text, x250 y270 w150 h100, Macro Developer and Project Lead
-    Gui, Font, s8 cBlue, Segoe UI
     Gui, Add, Link, x50 y310 w150 h30, <a href="https://madefrom.rocks">Website</a>
     Gui, Add, Link, x50 y330 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
     Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/qsJ4mT3C4Z">Main Discord Server</a>
@@ -753,19 +917,22 @@ ShowGui:
 return
 
 UpdatePerfSetting:
-    if (perfSetting = "Modern PC (stable FPS on high)") {
+    Gui, Submit, NoHide
+    perfMode := StrSplit(perfSetting, " ")[1]
+    if (perfMode = "Modern") {
         sleepPerf := 50
-    } else if (perfSetting = "Default") {
+    } else if (perfMode = "Default") {
         sleepPerf := 100
-    } else if (perfSetting = "Chromebook (cannot get stable FPS)") {
+    } else if (perfMode = "Chromebook") {
         sleepPerf := 150
-    } else if (perfSetting = "Atari 2600 (bless your soul)") {
+    } else if (perfMode = "Atari") {
         sleepPerf := 200
-    } else if (perfSetting = "Supercomputer (do not use)") {
+    } else if (perfMode = "Supercomputer") {
         sleepPerf := 0
     } else {
-        sleepPerf := 100 ; default back so that the weird bug does not appear
+        sleepPerf := 100
     }
+    saveValues()
 Return
 
 UpdatePlayerValues:
@@ -775,28 +942,15 @@ UpdatePlayerValues:
     webhookURL := Trim(webhookURL)
     discordID := Trim(discordID)
 
-    if (privateServerLink = "") {
-        MsgBox, 48, Error, Private Server Link cannot be empty!
-        return
+    if(RegExMatch(discordID, "\D")) {
+        tooltipLog("Your Discord ID must only contain numbers")
     }
 
-    if (webhookURL = "") {
-        MsgBox, 48, Error, Webhook URL cannot be empty!
-        return
-    }
-
-    if (discordID = "") {
-        MsgBox, 48, Error, Discord User ID cannot be empty!
-        return
-    }
-
-    if (perfSetting = "") {
-        MsgBox, 48, Error, Device Performance cannot be empty!
-        return
+    if(privateServerLink = "") {
+        tooltipLog("If you want to rejoin on error, you must provide a private server link")
     }
 
     saveValues()
-    MsgBox, 64, Success, Settings saved successfully!
 Return
 
 loadValues() {
@@ -804,10 +958,10 @@ loadValues() {
     IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink
     IniRead, discordID, config.ini, PlayerConf, discordID
     IniRead, perfSetting, config.ini, PlayerConf, perfSetting
-
     IniRead, currentlyAllowedSeedsStr, config.ini, PersistentData, currentlyAllowedSeeds
     IniRead, currentlyAllowedGearStr, config.ini, PersistentData, currentlyAllowedGear
     IniRead, currentlyAllowedEggsStr, config.ini, PersistentData, currentlyAllowedEggs
+    IniRead, currentlyAllowedEventstr, config.ini, PersistentData, currentlyAllowedEvent
 
     if (currentlyAllowedSeedsStr != "")
         currentlyAllowedSeeds := StrSplit(currentlyAllowedSeedsStr, ", ")
@@ -824,20 +978,28 @@ loadValues() {
         currentlyAllowedEggs := StrSplit(currentlyAllowedEggsStr, ", ")
     else
         currentlyAllowedEggs := []
+
+    if  (currentlyAllowedEventStr != "")
+        currentlyAllowedEvent := StrSplit(currentlyAllowedEventstr, ", ")
+
+    Else
+        currentlyAllowedEvent := []
 }
 
 saveValues() {
     IniWrite, %privateServerLink%, config.ini, PlayerConf, privateServerLink
     IniWrite, %webhookURL%, config.ini, PlayerConf, webhookURL
     IniWrite, %discordID%, config.ini, PlayerConf, discordID
-    IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
 
     currentlyAllowedSeedsStr := arrayToString(currentlyAllowedSeeds)
     currentlyAllowedGearStr := arrayToString(currentlyAllowedGear)
     currentlyAllowedEggsStr := arrayToString(currentlyAllowedEggs)
+    currentlyAllowedEventStr := arrayToString(currentlyAllowedEvent)
     IniWrite, %currentlyAllowedSeedsStr%, config.ini, PersistentData, currentlyAllowedSeeds
     IniWrite, %currentlyAllowedGearStr%, config.ini, PersistentData, currentlyAllowedGear
     IniWrite, %currentlyAllowedEggsStr%, config.ini, PersistentData, currentlyAllowedEggs
+    IniWrite, %currentlyAllowedEventStr%, config.ini, PersistentData, currentlyAllowedEvent
+    IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
 }
 
 ToggleAllSeeds:
@@ -895,10 +1057,29 @@ UpdateEggState:
     Loop, % eggItems.Length() {
         if(eggCheckboxes%A_Index% = 1)
             insertByReferenceOrder(currentlyAllowedEggs, eggItems[A_Index], eggItems)
+
     }
     saveValues()
 return
 
+ToggleAllEvent:
+    GuiControlGet, checkState,, CheckAllEvent
+    Loop % eventItems.Length() {
+        control := "eventCheckboxes" A_Index
+        GuiControl,, %control%, %checkState%
+    }
+    Gosub, UpdateEventState
+return
+
+UpdateEventState:
+    Gui Submit, NoHide
+    currentlyAllowedEvent := []
+    Loop, % eventItems.Length() {
+        if(eventCheckboxes%A_Index% = 1)
+            insertByReferenceOrder(currentlyAllowedEvent, eventItems[A_Index], eventItems)
+    }
+    saveValues()
+return
 Close:
     sendDiscordMessage("Macro exited!", 16711680)
 ExitApp

@@ -14,7 +14,7 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange
     , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
-    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed","Elder Strawberry"]
+    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Elder Strawberry"]
 
 ; Edit this to change the gear
 global gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler","Medium Toy","Medium Treat"
@@ -53,7 +53,8 @@ global imBroke := false
 global started := 0
 global messageQueue := []
 global sleepPerf := 200
-global perfSetting := "Modern PC (stable FPS on high)"
+
+global perfSetting := "Default"
 
 WinActivate, ahk_exe RobloxPlayerBeta.exe
 
@@ -78,9 +79,7 @@ Alignment:
     ; DDE - get to box and enter
     keyEncoder("REDDDDE")
     startUINav()
-    repeatKey("Esc")
-    sleep, 10
-    repeatKey("Esc")
+    repeatKey("Esc", 2)
     Sleep, 500
     startUINav()
     keyEncoder("REDDDE")
@@ -148,8 +147,7 @@ SeedCycle:
     startUINav()
     ;open shop
     sleep, 1000
-    keyEncoder("RRREDDD")
-    sleep, 100
+    keyEncoder("RRREDDDW")
     SendInput, e
     Sleep, 3000
     repeatKey("Up", 40)
@@ -223,12 +221,13 @@ EggCycle:
         SendInput, {w Down}
         Sleep, 600
         SendInput, {w Up}
+        Sleep, 600
         SendInput, e
         Sleep, 3000
 
         Loop, 5 {
             Send, {WheelUp}
-            Sleep, 10
+            Sleep, %sleepPerf%
         }
         Sleep, 500
 
@@ -542,7 +541,7 @@ buyAllAvailableEvent(spamCount := 10, item := "") {
 }
 
 isThereStock() {
-    Sleep, 50
+    Sleep, %sleepPerf%
     return colorDetect(0x20b41c)
 }
 
@@ -563,9 +562,9 @@ isShopOpen() {
 
 colorDetect(c) {
     startXPercent := 42
-    startYPercent := 25
+    startYPercent := 23
     endXPercent := 70
-    endYPercent := 75
+    endYPercent := 77
 
     CoordMode, Pixel, Screen
 
@@ -582,10 +581,6 @@ colorDetect(c) {
         return true
     }
     return false
-}
-
-screwJandelOrRoblox() {
-    keyEncoder("ULLULLULLULLULLULLULLULLULLULLULLULLULLULLULLULL")
 }
 
 startUINav() {
@@ -679,7 +674,7 @@ typeString(string) {
 
 insertByReferenceOrder(targetList, value, referenceList) {
     refIndex := indexOf(referenceList, value)
-    if (refIndex = -1) ; reference doesn't exist, if you get here we have issues
+    if (refIndex = -1) ; reference doesn't exist, if you get here, we have issues
         return
 
     insertPos := 0
@@ -808,7 +803,7 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c1C96EF vCheckAllSeeds gToggleAllSeeds, Select All Seeds
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX +25
+    paddingX := groupBoxX +35
     Loop % seedItems.Length() {
         row := Mod(A_Index - 1, Ceil(seedItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(seedItems.Length() / cols))
@@ -816,7 +811,7 @@ ShowGui:
         y := paddingY + (itemH * row)
         seed := seedItems[A_Index]
         isChecked := contains(currentlyAllowedSeeds, seed) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateSeedState vseedCheckboxes%A_Index% Checked%isChecked%, % seed
+        Gui, Add, Checkbox, x%x% y%y% w143 h23 gUpdateSeedState vseedCheckboxes%A_Index% Checked%isChecked%, % seed
     }
 
     Gui, Tab, Gear
@@ -958,10 +953,11 @@ loadValues() {
     IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink
     IniRead, discordID, config.ini, PlayerConf, discordID
     IniRead, perfSetting, config.ini, PlayerConf, perfSetting
+
     IniRead, currentlyAllowedSeedsStr, config.ini, PersistentData, currentlyAllowedSeeds
     IniRead, currentlyAllowedGearStr, config.ini, PersistentData, currentlyAllowedGear
     IniRead, currentlyAllowedEggsStr, config.ini, PersistentData, currentlyAllowedEggs
-    IniRead, currentlyAllowedEventstr, config.ini, PersistentData, currentlyAllowedEvent
+    IniRead, currentlyAllowedEventStr, config.ini, PersistentData, currentlyAllowedEvent
 
     if (currentlyAllowedSeedsStr != "")
         currentlyAllowedSeeds := StrSplit(currentlyAllowedSeedsStr, ", ")
@@ -980,7 +976,7 @@ loadValues() {
         currentlyAllowedEggs := []
 
     if  (currentlyAllowedEventStr != "")
-        currentlyAllowedEvent := StrSplit(currentlyAllowedEventstr, ", ")
+        currentlyAllowedEvent := StrSplit(currentlyAllowedEventStr, ", ")
 
     Else
         currentlyAllowedEvent := []
@@ -990,6 +986,7 @@ saveValues() {
     IniWrite, %privateServerLink%, config.ini, PlayerConf, privateServerLink
     IniWrite, %webhookURL%, config.ini, PlayerConf, webhookURL
     IniWrite, %discordID%, config.ini, PlayerConf, discordID
+    IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
 
     currentlyAllowedSeedsStr := arrayToString(currentlyAllowedSeeds)
     currentlyAllowedGearStr := arrayToString(currentlyAllowedGear)

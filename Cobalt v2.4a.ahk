@@ -68,21 +68,21 @@ StartMacro:
     sendDiscordMessage("Macro started!", 65280)
     WinActivate, ahk_exe RobloxPlayerBeta.exe
     finished := false
+    isThereStock()
+Return
 
 Alignment:
     exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
     startUINav()
-    ; RE - open backpack
-    ; RRR - go to garden
-    ; DDE - get to box and enter
-    keyEncoder("REDDDDE")
+    ; RERRRDDE method seems to work more consistently but needs more work?
+    keyEncoder("RELDDDDE")
     startUINav()
     repeatKey("Esc", 2)
     Sleep, 500
     startUINav()
-    keyEncoder("REDDDE")
+    keyEncoder("RELDDDE")
     typeString("recall")
     keyEncoder("EDDDUUEWDRE")
     ; close it
@@ -218,16 +218,14 @@ EggCycle:
         canDoEgg := false
         tooltipLog("Going to egg shop...")
         recalibrateCameraDistance()
-        SendInput, {w Down}
-        Sleep, 600
-        SendInput, {w Up}
-        Sleep, 600
+        holdKey("w", 600)
+        Sleep, %sleepPerf%
         SendInput, e
         Sleep, 3000
 
         Loop, 5 {
             Send, {WheelUp}
-            Sleep, %sleepPerf%
+            Sleep, 10
         }
         Sleep, 500
 
@@ -267,37 +265,23 @@ EventCycle:
         sleep, 30
         startUINav()
         keyEncoder("DRRE")
-        Sleep, %perfSleep%
         startUINav()
-        SendInput, {d Down}
-        Sleep, 7000
-        SendInput, {d Up}
-        Sleep, %perfSleep%
-        SendInput, {w Down}
-        Sleep, 700
-        SendInput, {w Up}
         Sleep, 100
-        SendInput, {d Down}
-        Sleep, 1900
-        SendInput, {d Up}
-        Sleep, %perfSleep%
-        SendInput, {s Down}
-        Sleep, 2200
-        SendInput, {s Up}
-        Sleep, %perfSleep%
-        SendInput, {a Down}
-        Sleep, 900
-        SendInput, {a Up}
-        Sleep, %perfSleep%
-        SendInput, {s Down}
-        Sleep, 30
-        SendInput, {s Up}
-        Sleep, %sleepPerf%
+        holdKey("d", 7000)
+        Sleep, 100
+        holdKey("w", 700)
+        Sleep, 100
+        holdKey("d", 1900)
+        Sleep, 100
+        holdKey("s", 2200)
+        Sleep, 100
+        holdKey("a", 900)
+        Sleep, 100
+        holdKey("s", 30)
+        Sleep, 100
         tooltipLog("Opening event shop...")
         SendInput, e
         Sleep, 3000
-        Click
-        sleep, 10
         Loop, 5 {
             Send, {WheelUp}
             Sleep, 10
@@ -352,8 +336,8 @@ reconnect() {
     Sleep, 1000
     SafeClickRelative(0.5, 0.5)
     Sleep, 15000
-    Gosub, Alignment
     sendDiscordMessage("Reconnected to the game!", 65280)
+    Gosub, Alignment
 }
 
 exitIfWindowDies() {
@@ -400,46 +384,6 @@ ShowTimeTip:
 
 Return
 
-SafeMoveRelative(xRatio, yRatio) {
-
-    if WinExist("ahk_exe RobloxPlayerBeta.exe") {
-        WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-        moveX := winX + Round(xRatio * winW)
-        moveY := winY + Round(yRatio * winH)
-        MouseMove, %moveX%, %moveY%
-    }
-
-}
-
-SafeClickRelative(xRatio, yRatio) {
-
-    if WinExist("ahk_exe RobloxPlayerBeta.exe") {
-        WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-        clickX := winX + Round(xRatio * winW)
-        clickY := winY + Round(yRatio * winH)
-        Click, %clickX%, %clickY%
-    }
-
-}
-
-getMouseCoord(axis) {
-
-    WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-    CoordMode, Mouse, Screen
-    MouseGetPos, mouseX, mouseY
-
-    relX := (mouseX - winX) / winW
-    relY := (mouseY - winY) / winH
-
-    if (axis = "x")
-        return relX
-    else if (axis = "y")
-        return relY
-
-    return ""
-
-}
-
 goShopping(arr, allArr, spamCount := 50) {
     startUINav()
     startUINav()
@@ -458,7 +402,7 @@ goShopping(arr, allArr, spamCount := 50) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("DDUE")
+    keyEncoder("LLDDUE")
 }
 
 goShoppingEvent(arr, allArr, spamCount := 50) {
@@ -499,7 +443,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("RRRDE")
+    keyEncoder("RRDRE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
@@ -541,8 +485,8 @@ buyAllAvailableEvent(spamCount := 10, item := "") {
 }
 
 isThereStock() {
-    Sleep, %sleepPerf%
-    return colorDetect(0x20b41c)
+    Sleep, 200
+    return (colorDetect(0x20b41c) || colorDetect(0x26EE26))
 }
 
 isShopOpen() {
@@ -576,11 +520,51 @@ colorDetect(c) {
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
     PixelSearch, px, py, x1, y1, x2, y2, c, 10, Fast RGB
-    ; MouseMove, px, py ; uncomment to test colo(u)r detection
+    MouseMove, px, py ; uncomment to test colo(u)r detection
     if(ErrorLevel = 0) {
         return true
     }
     return false
+}
+
+SafeMoveRelative(xRatio, yRatio) {
+
+    if WinExist("ahk_exe RobloxPlayerBeta.exe") {
+        WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
+        moveX := winX + Round(xRatio * winW)
+        moveY := winY + Round(yRatio * winH)
+        MouseMove, %moveX%, %moveY%
+    }
+
+}
+
+SafeClickRelative(xRatio, yRatio) {
+
+    if WinExist("ahk_exe RobloxPlayerBeta.exe") {
+        WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
+        clickX := winX + Round(xRatio * winW)
+        clickY := winY + Round(yRatio * winH)
+        Click, %clickX%, %clickY%
+    }
+
+}
+
+getMouseCoord(axis) {
+
+    WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
+    CoordMode, Mouse, Screen
+    MouseGetPos, mouseX, mouseY
+
+    relX := (mouseX - winX) / winW
+    relY := (mouseY - winY) / winH
+
+    if (axis = "x")
+        return relX
+    else if (axis = "y")
+        return relY
+
+    return ""
+
 }
 
 startUINav() {
@@ -636,6 +620,13 @@ repeatKey(key, count := 1) {
         SendInput, {%key%}
         Sleep, %sleepPerf%
     }
+}
+
+; holds keys obv
+holdKey(key, time) {
+    SendInput, {%key% Down}
+    Sleep, %time%
+    SendInput, {%key% Up}
 }
 
 indexOf(array := "", value := "") {

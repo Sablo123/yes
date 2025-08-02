@@ -10,19 +10,25 @@ global discordID := ""
 global uiNavKeybind = "\"
 
 ; Edit this to change the seeds
-global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip Seed", "Tomato Seed", "Corn Seed"
+global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
+    , "Orange Tulip Seed", "Tomato Seed", "Corn Seed"
     , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
-    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Elder Strawberry"]
+    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
+    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry"]
 
 ; Edit this to change the gear
-global gearItems := ["Watering Can", "Trading Ticket","Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler","Medium Toy","Medium Treat"
-    , "Godly Sprinkler", "Magnifying Glass", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Friendship Pot", "Levelup Lollipop"]
+global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
+    , "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
+    , "Medium Toy","Medium Treat", "Godly Sprinkler"
+    , "Magnifying Glass", "Master Sprinkler", "Cleaning Spray"
+    , "Favorite Tool", "Harvest Tool", "Friendship Pot"
+    , "Grandmaster Sprinkler", "Levelup Lollipop"]
 
 ; Edit this to change the eggs
-global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg", "Mythical Egg", "Paradise Egg"
-    ,"Bug Egg"]
+global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg"
+    , "Mythical Egg", "Paradise Egg" ,"Bug Egg"]
 
 global eventItems := ["Zen Seed Pack", "Zen Egg", "Hot Spring", "Zen Sand", "Tranquil Radar","Corrupt Radar", "Zenflare", "Zen Crate","Sakura Bush", "Soft Sunshine", "Koi", "Zen Gnome Crate", "Spiked Mango", "Pet Shard Tranquil", "Pet Shard Corrupt", "Raiju"]
 

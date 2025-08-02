@@ -15,6 +15,10 @@ We will try our best to update the macro if and when it breaks.
 5. ???
 6. Profit
 
+## IMPORTANT
+Make sure you have UI navigation turned on 
+Make sure you have zero speed effectiing pets equip like Brown mouse, Raptor ect
+
 ## Contribution
 
 If for some reason you are smart enough to contribute to this codebase, why are you here?

@@ -33,7 +33,7 @@ global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg"
 global eventItems := ["Zen Seed Pack", "Zen Egg", "Hot Spring", "Zen Sand", "Tranquil Radar","Corrupt Radar", "Zenflare", "Zen Crate","Sakura Bush", "Soft Sunshine", "Koi", "Zen Gnome Crate", "Spiked Mango", "Pet Shard Tranquil", "Pet Shard Corrupt", "Raiju"]
 
 ; Edit this to change what you want to be pinged for
-global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Master Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
+global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
 
 ; - Technical stuff below, no touchy! -
 
@@ -156,7 +156,7 @@ SeedCycle:
     startUINav()
     ;open shop
     sleep, 1000
-    keyEncoder("ULLULLULLULLULLULLWRRRLEW")
+    keyEncoder("ULLULLULLULLULLULLWRRREW")
     SendInput, e
     Sleep, 3000
     repeatKey("Up", 40)
@@ -795,7 +795,7 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c32FF32 vCheckAllGear gToggleAllGear, Select All Gear
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX + 25
+    paddingX := groupBoxX + 25.5
     Loop % gearItems.Length() {
         row := Mod(A_Index - 1, Ceil(gearItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(gearItems.Length() / cols))
@@ -803,7 +803,7 @@ ShowGui:
         y := paddingY + (itemH * row)
         gear := gearItems[A_Index]
         isChecked := contains(currentlyAllowedGear, gear) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
+        Gui, Add, Checkbox, x%x% y%y% w160 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
     }
 
     Gui, Tab, Eggs

@@ -1,33 +1,40 @@
 #SingleInstance, force
 
-global version := "v2.4a"
+global version := "v2.5"
 
 global privateServerLink := ""
 global webhookURL := ""
 global discordID := ""
 
 ; -------- Configurable Variables --------
-global uiNavKeybind = "\"
+global uiNavKeybind := "\"
+global invNavKeybind := "``"
 
 ; Edit this to change the seeds
-global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed", "Orange Tulip Seed", "Tomato Seed", "Corn Seed"
+global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
+    , "Orange Tulip Seed", "Tomato Seed", "Corn Seed"
     , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
-    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Elder Strawberry"]
+    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
+    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry"]
 
 ; Edit this to change the gear
-global gearItems := ["Watering Can", "Trowel", "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler","Medium Toy","Medium Treat"
-    , "Godly Sprinkler", "Magnifying Glass", "Tanning Mirror", "Master Sprinkler", "Cleaning Spray", "Favorite Tool", "Harvest Tool", "Friendship Pot", "Levelup Lollipop"]
+global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
+    , "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
+    , "Medium Toy","Medium Treat", "Godly Sprinkler"
+    , "Magnifying Glass", "Master Sprinkler", "Cleaning Spray"
+    , "Favorite Tool", "Harvest Tool", "Friendship Pot"
+    , "Grandmaster Sprinkler", "Levelup Lollipop"]
 
 ; Edit this to change the eggs
-global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg", "Mythical Egg", "Paradise Egg"
-    ,"Bug Egg"]
+global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg"
+    , "Mythical Egg", "Paradise Egg" ,"Bug Egg"]
 
 global eventItems := ["Zen Seed Pack", "Zen Egg", "Hot Spring", "Zen Sand", "Tranquil Radar","Corrupt Radar", "Zenflare", "Zen Crate","Sakura Bush", "Soft Sunshine", "Koi", "Zen Gnome Crate", "Spiked Mango", "Pet Shard Tranquil", "Pet Shard Corrupt", "Raiju"]
 
 ; Edit this to change what you want to be pinged for
-global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Master Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
+global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
 
 ; - Technical stuff below, no touchy! -
 
@@ -68,25 +75,23 @@ StartMacro:
     sendDiscordMessage("Macro started!", 65280)
     WinActivate, ahk_exe RobloxPlayerBeta.exe
     finished := false
-    isThereStock()
-Return
 
 Alignment:
     exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
+    startInvAction()
     startUINav()
-    ; RERRRDDE method seems to work more consistently but needs more work?
-    keyEncoder("RELDDDDE")
+    keyEncoder("E")
+    startInvAction()
     startUINav()
-    repeatKey("Esc", 2)
-    Sleep, 500
-    startUINav()
-    keyEncoder("RELDDDE")
+    keyEncoder("ULLULLULLULLULLULL")
+    keyEncoder("RERRRDDRRRUUUE")
+    repeatKey("Backspace", 30)
     typeString("recall")
-    keyEncoder("EDDDUUEWDRE")
+    keyEncoder("EDUUEDRE")
     ; close it
-    Send, ``
+    startInvAction()
     tooltipLog("Aligning camera...")
     recalibrateCameraDistance()
 
@@ -124,8 +129,9 @@ Alignment:
     repeatKey("Esc")
     sleep, 500
     startUINav()
+    keyEncoder("ULLULLULLULLULLULL")
     sleep, 500
-    keyEncoder("DRELERRELELERRELELERRE")
+    keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
     startUINav()
     repeatKey("Esc")
     sleep, 100
@@ -147,10 +153,11 @@ SeedCycle:
     startUINav()
     ;open shop
     sleep, 1000
-    keyEncoder("RRREDDDW")
+    keyEncoder("ULLULLULLULLULLULLWRRREW")
     SendInput, e
+    startUINav()
+    startUINav()
     Sleep, 3000
-    repeatKey("Up", 40)
     if(isShopOpen()) {
         ;we now have the carrot selected, start seed nav
         tooltipLog("Shopping for seeds...")
@@ -189,10 +196,6 @@ GearCycle:
 
     if(isShopOpen()) {
         startUINav()
-        startUINav()
-        startUINav()
-        repeatKey("Up", 40)
-        Sleep, 100
         tooltipLog("Shopping for gear...")
         goShopping(currentlyAllowedGear, gearItems, 20)
         sendDiscordQueue("Gear Shop")
@@ -252,61 +255,6 @@ EggCycle:
         }
     }
 
-EventCycle:
-    exitIfWindowDies()
-    if(imBroke) {
-        Gosub, WaitForNextCycle ; you cant afford it lil bro
-        Return
-    }
-
-    if(currentlyAllowedEvent.Length() > 0 && canDoEvent) {
-        canDoEvent := false
-        tooltipLog("Going to Event Shop")
-        sleep, 30
-        startUINav()
-        keyEncoder("DRRE")
-        startUINav()
-        Sleep, 100
-        holdKey("d", 7000)
-        Sleep, 100
-        holdKey("w", 700)
-        Sleep, 100
-        holdKey("d", 1900)
-        Sleep, 100
-        holdKey("s", 2200)
-        Sleep, 100
-        holdKey("a", 900)
-        Sleep, 100
-        holdKey("s", 30)
-        Sleep, 100
-        tooltipLog("Opening event shop...")
-        SendInput, e
-        Sleep, 3000
-        Loop, 5 {
-            Send, {WheelUp}
-            Sleep, 10
-        }
-
-        Sleep, 500
-
-        SafeMoveRelative(0.80, 0.29)
-        MouseClick, Left
-        Sleep 3000
-
-        if(isShopOpen()) {
-            startUINav()
-            tooltipLog("Shopping for event items...")
-            goShoppingEvent(currentlyAllowedEvent, eventItems)
-            sendDiscordQueue("Event Shop")
-            Sleep, 500
-            startUINav()
-        } else {
-            tooltipLog("Error: Event shop did not open")
-            sendDiscordMessage("Event shop did not open! Reconnecting...", 16711680)
-            reconnect()
-        }
-    }
-
 WaitForNextCycle:
     SafeMoveRelative(0.5, 0.5)
     finished := true
@@ -360,13 +308,14 @@ ShowTimeTip:
     RemainingSecs30 := Mod(SecondsUntil30, 60)
     FormattedTime30 := Format("{:02}:{:02}", RemainingMins30, RemainingSecs30)
 
-    SecondsUntilHour := 3600 - (Mod(A_Hour * 60 + A_Min, 60) * 60 + A_Sec)
-    SecondsUntilHour := Mod(SecondsUntilHour, 3601)
-    RemainingMins60 := Floor(SecondsUntilHour / 60)
-    RemainingSecs60 := Mod(SecondsUntilHour, 60)
-    FormattedTime60 := Format("{:02}:{:02}", RemainingMins60, RemainingSecs60)
+    ; SecondsUntilHour := 3600 - (Mod(A_Hour * 60 + A_Min, 60) * 60 + A_Sec)
+    ; SecondsUntilHour := Mod(SecondsUntilHour, 3601)
+    ; RemainingMins60 := Floor(SecondsUntilHour / 60)
+    ; RemainingSecs60 := Mod(SecondsUntilHour, 60)
+    ; FormattedTime60 := Format("{:02}:{:02}", RemainingMins60, RemainingSecs60)
 
-    ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%`nNext Event Shop in %FormattedTime60%
+    ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%
+    ; `nNext Event Shop in %FormattedTime60%
 
     if (SecondsUntil30 < 3) {
         canDoEgg := true
@@ -385,14 +334,11 @@ ShowTimeTip:
 Return
 
 goShopping(arr, allArr, spamCount := 50) {
-    startUINav()
-    startUINav()
-    startUINav()
-    startUINav()
-    keyEncoder("DD")
+    repeatKey("Up", 40)
+    keyEncoder("LLRDRD")
     for index, item in allArr {
 
-        if(!contains(arr, item)) {
+        if(!arrContains(arr, item)) {
             repeatKey("Down")
             Continue
         }
@@ -402,39 +348,15 @@ goShopping(arr, allArr, spamCount := 50) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LLDDUE")
-}
-
-goShoppingEvent(arr, allArr, spamCount := 50) {
-    startUINav()
-    startUINav()
-    startUINav()
-    startUINav()
-    keyEncoder("DD")
-    for index, item in allArr {
-        scrollDepth := scrollCount.HasKey(item) ? scrollCount[item] : 1
-        if(!contains(arr, item)) {
-            repeatKey("Down", scrollDepth)
-            Continue
-        }
-        buyAllAvailableEvent(spamCount, item)
-    }
-    if(messageQueue.Length() = 0) {
-        messageQueue.Push("Bought nothing...")
-    }
-    repeatKey("Up", 40)
-    keyEncoder("RRRRRUWE")
+    keyEncoder("LLRDRWEWW")
 }
 
 goShoppingEgg(arr, allArr) {
-    startUINav()
-    startUINav()
-    startUINav()
-    startUINav()
-    keyEncoder("DD")
+    repeatKey("Up", 40)
+    keyEncoder("LLLLURRRRRDD")
     for index, item in allArr {
-        if(!contains(arr, item)) {
-            repeatKey("Down", 2)
+        if(!arrContains(arr, item)) {
+            repeatKey("Down")
             Continue
         }
         buyAllAvailableEgg(5, item)
@@ -443,7 +365,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("RRDRE")
+    keyEncoder("LLLLURRRRRDEE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
@@ -451,6 +373,9 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Down")
     Sleep, 200
     if(isThereStock()) {
+        if(item != "Trowel") {
+            repeatKey("Left")
+        }
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
@@ -459,34 +384,25 @@ buyAllAvailable(spamCount := 50, item := "") {
 
 buyAllAvailableEgg(spamCount := 10, item := "") {
     repeatKey("Enter")
-    repeatKey("Down", 2)
-    Sleep, 200
-    if(isThereStock()) {
-        repeatKey("Enter", spamCount)
-        messageQueue.Push("Bought " . item . "!")
-    }
     repeatKey("Down")
-}
-
-buyAllAvailableEvent(spamCount := 10, item := "") {
-    scrollDepth := scrollCount.HasKey(item) ? scrollCount[item] : 1
-    repeatKey("Enter")
-    repeatKey("Down", scrollDepth)
     Sleep, 200
-
     if(isThereStock()) {
+        repeatKey("Left")
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
-    }
-    if(isThereStock()) { ; if theres still stock afterwards then ur broke
-        imBroke = true ; womp womp
     }
     repeatKey("Down")
 }
 
 isThereStock() {
-    Sleep, 200
-    return (colorDetect(0x20b41c) || colorDetect(0x26EE26))
+    Sleep, 100
+    Loop, 3 {
+        if(colorDetect(0x20b41c) || colorDetect(0x26EE26)) {
+            return true
+        }
+        Sleep, 20
+    }
+    return false
 }
 
 isShopOpen() {
@@ -505,14 +421,12 @@ isShopOpen() {
 }
 
 colorDetect(c) {
-    startXPercent := 42
-    startYPercent := 23
-    endXPercent := 70
-    endYPercent := 77
+    startXPercent := 40
+    startYPercent := 27
+    endXPercent := 60
+    endYPercent := 85
 
     CoordMode, Pixel, Screen
-
-    WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
 
     x1 := Round((startXPercent / 100) * A_ScreenWidth)
     y1 := Round((startYPercent / 100) * A_ScreenHeight)
@@ -520,7 +434,7 @@ colorDetect(c) {
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
     PixelSearch, px, py, x1, y1, x2, y2, c, 10, Fast RGB
-    MouseMove, px, py ; uncomment to test colo(u)r detection
+    ; MouseMove, px, py ; uncomment to test colo(u)r detection
     if(ErrorLevel = 0) {
         return true
     }
@@ -569,6 +483,11 @@ getMouseCoord(axis) {
 
 startUINav() {
     SendInput, {%uiNavKeybind%}
+    Sleep, 50
+}
+
+startInvAction() {
+    SendInput, {%invNavKeybind%}
     Sleep, 50
 }
 
@@ -640,7 +559,7 @@ indexOf(array := "", value := "") {
     return -1
 }
 
-contains(array := "", value := "") {
+arrContains(array := "", value := "") {
 
     for index, item in array {
         if (value = item) {
@@ -785,7 +704,8 @@ ShowGui:
     groupBoxW := 490
     groupBoxH := 320
 
-    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Event|Settings|Credits
+    ; removed event so it wouldnt show -cbble
+    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Settings|Credits
 
     Gui, Tab, Seeds
     Gui, Font, s10
@@ -801,7 +721,7 @@ ShowGui:
         x := paddingX + (itemW * col)
         y := paddingY + (itemH * row)
         seed := seedItems[A_Index]
-        isChecked := contains(currentlyAllowedSeeds, seed) ? 1 : 0
+        isChecked := arrContains(currentlyAllowedSeeds, seed) ? 1 : 0
         Gui, Add, Checkbox, x%x% y%y% w143 h23 gUpdateSeedState vseedCheckboxes%A_Index% Checked%isChecked%, % seed
     }
 
@@ -812,15 +732,15 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c32FF32 vCheckAllGear gToggleAllGear, Select All Gear
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX + 25
+    paddingX := groupBoxX + 25.5
     Loop % gearItems.Length() {
         row := Mod(A_Index - 1, Ceil(gearItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(gearItems.Length() / cols))
         x := paddingX + (itemW * col)
         y := paddingY + (itemH * row)
         gear := gearItems[A_Index]
-        isChecked := contains(currentlyAllowedGear, gear) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
+        isChecked := arrContains(currentlyAllowedGear, gear) ? 1 : 0
+        Gui, Add, Checkbox, x%x% y%y% w160 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
     }
 
     Gui, Tab, Eggs
@@ -838,27 +758,8 @@ ShowGui:
         x := paddingX + (itemW * col)
         y := paddingY + (itemH * row)
         egg := eggItems[A_Index]
-        isChecked := contains(currentlyAllowedEggs, egg) ? 1 : 0
+        isChecked := arrContains(currentlyAllowedEggs, egg) ? 1 : 0
         Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateEggState veggCheckboxes%A_Index% Checked%isChecked%, % egg
-    }
-
-    Gui, Tab, Event
-    Gui, Font, s10
-    Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
-
-    Gui, Add, Checkbox, x55 y105 w150 h23 vCheckAllEvent gToggleAllEvent cEA6653, Select All Event Items
-
-    paddingY := groupBoxY + 50
-    paddingX := groupBoxX + 25
-    cols := 2
-    Loop % eventItems.Length() {
-        row := Mod(A_Index - 1, Ceil(eventItems.Length() / cols))
-        col := Floor((A_Index - 1) / Ceil(eventItems.Length() / cols))
-        x := paddingX + (itemW * col)
-        y := paddingY + (itemH * row)
-        event := eventItems[A_Index]
-        isChecked := contains(currentlyAllowedEvent, event) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateEventState veventCheckboxes%A_Index% Checked%isChecked%, % event
     }
 
     Gui, Tab, Settings
@@ -966,11 +867,11 @@ loadValues() {
     else
         currentlyAllowedEggs := []
 
-    if  (currentlyAllowedEventStr != "")
-        currentlyAllowedEvent := StrSplit(currentlyAllowedEventStr, ", ")
+    ; if  (currentlyAllowedEventStr != "")
+    ;     currentlyAllowedEvent := StrSplit(currentlyAllowedEventStr, ", ")
 
-    Else
-        currentlyAllowedEvent := []
+    ; Else
+    ;     currentlyAllowedEvent := []
 }
 
 saveValues() {
@@ -982,11 +883,11 @@ saveValues() {
     currentlyAllowedSeedsStr := arrayToString(currentlyAllowedSeeds)
     currentlyAllowedGearStr := arrayToString(currentlyAllowedGear)
     currentlyAllowedEggsStr := arrayToString(currentlyAllowedEggs)
-    currentlyAllowedEventStr := arrayToString(currentlyAllowedEvent)
+    ; currentlyAllowedEventStr := arrayToString(currentlyAllowedEvent)
     IniWrite, %currentlyAllowedSeedsStr%, config.ini, PersistentData, currentlyAllowedSeeds
     IniWrite, %currentlyAllowedGearStr%, config.ini, PersistentData, currentlyAllowedGear
     IniWrite, %currentlyAllowedEggsStr%, config.ini, PersistentData, currentlyAllowedEggs
-    IniWrite, %currentlyAllowedEventStr%, config.ini, PersistentData, currentlyAllowedEvent
+    ; IniWrite, %currentlyAllowedEventStr%, config.ini, PersistentData, currentlyAllowedEvent
     IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
 }
 
@@ -1050,24 +951,6 @@ UpdateEggState:
     saveValues()
 return
 
-ToggleAllEvent:
-    GuiControlGet, checkState,, CheckAllEvent
-    Loop % eventItems.Length() {
-        control := "eventCheckboxes" A_Index
-        GuiControl,, %control%, %checkState%
-    }
-    Gosub, UpdateEventState
-return
-
-UpdateEventState:
-    Gui Submit, NoHide
-    currentlyAllowedEvent := []
-    Loop, % eventItems.Length() {
-        if(eventCheckboxes%A_Index% = 1)
-            insertByReferenceOrder(currentlyAllowedEvent, eventItems[A_Index], eventItems)
-    }
-    saveValues()
-return
 Close:
     sendDiscordMessage("Macro exited!", 16711680)
 ExitApp

@@ -347,7 +347,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LLLLURRRRRDEE")
+    keyEncoder("ULLURRRRRDWRWRWRWRWLWRWE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {

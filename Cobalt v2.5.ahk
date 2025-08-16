@@ -367,7 +367,7 @@ goShoppingEgg(arr, allArr) {
     repeatKey("Up", 40)
     startUINav()
     startUINav()
-    keyEncoder("ULLURRRRRDE")
+    keyEncoder("ULLURRRRRDWRWRWRWRWLWRWE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {

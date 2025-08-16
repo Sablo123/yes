@@ -1,6 +1,6 @@
 #SingleInstance, force
 
-global version := "v2.5"
+global version := "v2.6"
 
 global privateServerLink := ""
 global webhookURL := ""
@@ -17,7 +17,7 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
     , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
-    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry"]
+    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry","Romanesco"]
 
 ; Edit this to change the gear
 global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
@@ -31,12 +31,15 @@ global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
 global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg"
     , "Mythical Egg", "Paradise Egg" ,"Bug Egg"]
 
-global eventItems := ["Zen Seed Pack", "Zen Egg", "Hot Spring", "Zen Sand", "Tranquil Radar","Corrupt Radar", "Zenflare", "Zen Crate","Sakura Bush", "Soft Sunshine", "Koi", "Zen Gnome Crate", "Spiked Mango", "Pet Shard Tranquil", "Pet Shard Corrupt", "Raiju"]
-
 ; Edit this to change what you want to be pinged for
-global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
+global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed","Elder Strawberry", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
 
 ; - Technical stuff below, no touchy! -
+global allList := []
+
+allList.Push(seedItems*)
+allList.Push(gearItems*)
+allList.Push(eggItems*)
 
 global currentlyAllowedSeeds := []
 global currentlyAllowedGear := []
@@ -54,8 +57,6 @@ global finished := true
 global cycleCount := 0
 global eggCounter := 0
 global canDoEgg := true
-global canDoEvent := true
-global imBroke := false
 
 global started := 0
 global messageQueue := []
@@ -66,7 +67,6 @@ global perfSetting := "Default"
 WinActivate, ahk_exe RobloxPlayerBeta.exe
 
 Gosub, ShowGui
-Gosub, UpdateSeedState
 
 StartMacro:
     if(started = 0) {
@@ -129,9 +129,7 @@ Alignment:
     repeatKey("Esc")
     sleep, 500
     startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
-    sleep, 500
-    keyEncoder("RRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
+    keyEncoder("ULLULLULLULLULLULLRRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
     startUINav()
     repeatKey("Esc")
     sleep, 100
@@ -139,8 +137,7 @@ Alignment:
     sleep, 100
     keyEncoder("UUUUUUUUUUUDRRW")
     repeatKey("Esc")
-    keyEncoder("WWDWRWEW")
-    sleep 200
+    keyEncoder("WDREWW")
     tooltipLog("Alignment complete!")
 
 SeedCycle:
@@ -189,8 +186,7 @@ GearCycle:
     }
     Sleep, 500
 
-    SafeMoveRelative(0.9, 0.4)
-    MouseClick, Left
+    SafeClickRelative(0.9, 0.5)
 
     Sleep, 3000
 
@@ -232,8 +228,7 @@ EggCycle:
         }
         Sleep, 500
 
-        SafeMoveRelative(0.75, 0.2)
-        MouseClick, Left
+        SafeClickRelative(0.75, 0.2)
         Sleep 3000
 
         if(isShopOpen()) {
@@ -266,8 +261,7 @@ Return
 tpToGear() {
     tooltipLog("Going to gear shop...")
     Send, {2}
-    SafeMoveRelative(0.5, 0.5)
-    MouseClick, Left
+    SafeClickRelative(0.5, 0.5)
     Sleep, 400
     Send, {2}
     Sleep, 400
@@ -308,14 +302,7 @@ ShowTimeTip:
     RemainingSecs30 := Mod(SecondsUntil30, 60)
     FormattedTime30 := Format("{:02}:{:02}", RemainingMins30, RemainingSecs30)
 
-    ; SecondsUntilHour := 3600 - (Mod(A_Hour * 60 + A_Min, 60) * 60 + A_Sec)
-    ; SecondsUntilHour := Mod(SecondsUntilHour, 3601)
-    ; RemainingMins60 := Floor(SecondsUntilHour / 60)
-    ; RemainingSecs60 := Mod(SecondsUntilHour, 60)
-    ; FormattedTime60 := Format("{:02}:{:02}", RemainingMins60, RemainingSecs60)
-
     ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%
-    ; `nNext Event Shop in %FormattedTime60%
 
     if (SecondsUntil30 < 3) {
         canDoEgg := true
@@ -326,11 +313,6 @@ ShowTimeTip:
         recalibrateCameraDistance()
         Gosub, Alignment
     }
-
-    if (SecondsUntil60 < 3) {
-        canDoEvent := true
-    }
-
 Return
 
 goShopping(arr, allArr, spamCount := 50) {
@@ -359,14 +341,12 @@ goShoppingEgg(arr, allArr) {
             repeatKey("Down")
             Continue
         }
-        buyAllAvailableEgg(5, item)
+        buyAllAvailable(5, item)
     }
     if(messageQueue.Length() = 0) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    startUINav()
-    startUINav()
     keyEncoder("ULLURRRRRDWRWRWRWRWLWRWE")
 }
 
@@ -384,42 +364,16 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Down")
 }
 
-buyAllAvailableEgg(spamCount := 10, item := "") {
-    repeatKey("Enter")
-    repeatKey("Down")
-    Sleep, 200
-    if(isThereStock()) {
-        repeatKey("Left")
-        repeatKey("Enter", spamCount)
-        messageQueue.Push("Bought " . item . "!")
-    }
-    repeatKey("Down")
-}
-
 isThereStock() {
-    Sleep, 100
-    Loop, 3 {
-        if(colorDetect(0x20b41c) || colorDetect(0x26EE26)) {
-            return true
-        }
-        Sleep, 20
-    }
-    return false
+    return colorDetect(0x20b41c) || colorDetect(0x26EE26)
 }
 
 isShopOpen() {
     Sleep, 50
-    ; every other shop
-    if(colorDetect(0x50240c)) {
-        return true
-    }
 
-    ; egg shop and event shops only for some odd reason
-    if(colorDetect(0x360805)) {
-        return true
-    }
-
-    return false
+    ; 1. every other shop
+    ; 2. event and egg
+    return colorDetect(0x50240c) || colorDetect(0x360805)
 }
 
 colorDetect(c) {
@@ -444,43 +398,25 @@ colorDetect(c) {
 }
 
 SafeMoveRelative(xRatio, yRatio) {
-
-    if WinExist("ahk_exe RobloxPlayerBeta.exe") {
-        WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-        moveX := winX + Round(xRatio * winW)
-        moveY := winY + Round(yRatio * winH)
-        MouseMove, %moveX%, %moveY%
+    if !WinExist("ahk_exe RobloxPlayerBeta.exe") {
+        Return
     }
 
+    WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
+    moveX := winX + Round(xRatio * winW)
+    moveY := winY + Round(yRatio * winH)
+    MouseMove, %moveX%, %moveY%
 }
 
 SafeClickRelative(xRatio, yRatio) {
-
-    if WinExist("ahk_exe RobloxPlayerBeta.exe") {
-        WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-        clickX := winX + Round(xRatio * winW)
-        clickY := winY + Round(yRatio * winH)
-        Click, %clickX%, %clickY%
+    if !WinExist("ahk_exe RobloxPlayerBeta.exe") {
+        Return
     }
 
-}
-
-getMouseCoord(axis) {
-
     WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-    CoordMode, Mouse, Screen
-    MouseGetPos, mouseX, mouseY
-
-    relX := (mouseX - winX) / winW
-    relY := (mouseY - winY) / winH
-
-    if (axis = "x")
-        return relX
-    else if (axis = "y")
-        return relY
-
-    return ""
-
+    clickX := winX + Round(xRatio * winW)
+    clickY := winY + Round(yRatio * winH)
+    Click, %clickX%, %clickY%
 }
 
 startUINav() {
@@ -503,12 +439,6 @@ HideTooltip:
     SetTimer, HideTooltip, Off
 Return
 
-; R = right
-; L = left
-; U = up
-; D = down
-; E = enter
-; W = 100ms wait
 keyEncoder(str) {
     Loop, Parse, str
     {
@@ -551,7 +481,6 @@ holdKey(key, time) {
 }
 
 indexOf(array := "", value := "") {
-
     for index, item in array {
         if (value = item) {
             return index
@@ -562,7 +491,6 @@ indexOf(array := "", value := "") {
 }
 
 arrContains(array := "", value := "") {
-
     for index, item in array {
         if (value = item) {
             return true
@@ -706,8 +634,7 @@ ShowGui:
     groupBoxW := 490
     groupBoxH := 320
 
-    ; removed event so it wouldnt show -cbble
-    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Settings|Credits
+    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Ping List|Settings|Credits
 
     Gui, Tab, Seeds
     Gui, Font, s10
@@ -716,7 +643,7 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c1C96EF vCheckAllSeeds gToggleAllSeeds, Select All Seeds
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX +25.5
+    paddingX := groupBoxX + 25
     Loop % seedItems.Length() {
         row := Mod(A_Index - 1, Ceil(seedItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(seedItems.Length() / cols))
@@ -734,7 +661,7 @@ ShowGui:
     Gui, Add, Checkbox, x205 y105 w150 h23 c32FF32 vCheckAllGear gToggleAllGear, Select All Gear
 
     paddingY := groupBoxY + 50
-    paddingX := groupBoxX + 25.5
+    paddingX := groupBoxX + 25
     Loop % gearItems.Length() {
         row := Mod(A_Index - 1, Ceil(gearItems.Length() / cols))
         col := Floor((A_Index - 1) / Ceil(gearItems.Length() / cols))
@@ -763,6 +690,27 @@ ShowGui:
         isChecked := arrContains(currentlyAllowedEggs, egg) ? 1 : 0
         Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateEggState veggCheckboxes%A_Index% Checked%isChecked%, % egg
     }
+
+    ; ! experimental ping list, disable this before hotfix!
+    Gui, Tab, Ping List
+    Gui, Add, ListView, r17 w500 BackgroundBlack gAddToPingList Checked NoSort AltSubmit -Hdr vPingListLV, Ping List
+
+    LV_Delete()
+    GuiControl, -Redraw, PingListLV  ; suspend redraw for speed and reliability
+    ; thank you chatgpt :heart:
+
+    Loop % allList.Length() {
+        LV_Add("", allList[A_Index]) ; no check state yet
+    }
+
+    ; now set checkboxes explicitly
+    Loop % allList.Length() {
+        if arrContains(pingList, allList[A_Index])
+            LV_Modify(A_Index, "Check")
+    }
+
+    GuiControl, +Redraw, PingListLV  ; resume redraw
+    LV_ModifyCol()
 
     Gui, Tab, Settings
     Gui, Font, s10
@@ -805,15 +753,30 @@ ShowGui:
     Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
+AddToPingList:
+    if (A_GuiEvent == "I")
+    {
+        row := 0
+        pingList := []
+        Loop {
+            row := LV_GetNext(row, "Checked")
+            if not row
+                Break
+            pingList.Push(allList[row])
+        }
+        saveValues()
+    }
+return
+
 UpdatePerfSetting:
     Gui, Submit, NoHide
     perfMode := StrSplit(perfSetting, " ")[1]
     if (perfMode = "Modern") {
         sleepPerf := 50
     } else if (perfMode = "Default") {
-        sleepPerf := 100
+        sleepPerf := 75
     } else if (perfMode = "Chromebook") {
-        sleepPerf := 150
+        sleepPerf := 125
     } else if (perfMode = "Atari") {
         sleepPerf := 200
     } else if (perfMode = "Supercomputer") {
@@ -852,6 +815,11 @@ loadValues() {
     IniRead, currentlyAllowedGearStr, config.ini, PersistentData, currentlyAllowedGear
     IniRead, currentlyAllowedEggsStr, config.ini, PersistentData, currentlyAllowedEggs
     IniRead, currentlyAllowedEventStr, config.ini, PersistentData, currentlyAllowedEvent
+    IniRead, pingListStr, config.ini, PersistentData, pingList
+
+    if(pingListStr != "" and pingListStr != "ERROR") {
+        pingList := StrSplit(pingListStr, ", ")
+    }
 
     if (currentlyAllowedSeedsStr != "")
         currentlyAllowedSeeds := StrSplit(currentlyAllowedSeedsStr, ", ")
@@ -868,12 +836,6 @@ loadValues() {
         currentlyAllowedEggs := StrSplit(currentlyAllowedEggsStr, ", ")
     else
         currentlyAllowedEggs := []
-
-    ; if  (currentlyAllowedEventStr != "")
-    ;     currentlyAllowedEvent := StrSplit(currentlyAllowedEventStr, ", ")
-
-    ; Else
-    ;     currentlyAllowedEvent := []
 }
 
 saveValues() {
@@ -885,12 +847,12 @@ saveValues() {
     currentlyAllowedSeedsStr := arrayToString(currentlyAllowedSeeds)
     currentlyAllowedGearStr := arrayToString(currentlyAllowedGear)
     currentlyAllowedEggsStr := arrayToString(currentlyAllowedEggs)
-    ; currentlyAllowedEventStr := arrayToString(currentlyAllowedEvent)
+    pingListStr := arrayToString(pingList)
+
     IniWrite, %currentlyAllowedSeedsStr%, config.ini, PersistentData, currentlyAllowedSeeds
     IniWrite, %currentlyAllowedGearStr%, config.ini, PersistentData, currentlyAllowedGear
     IniWrite, %currentlyAllowedEggsStr%, config.ini, PersistentData, currentlyAllowedEggs
-    ; IniWrite, %currentlyAllowedEventStr%, config.ini, PersistentData, currentlyAllowedEvent
-    IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
+    IniWrite, %pingListStr%, config.ini, PersistentData, pingList
 }
 
 ToggleAllSeeds:
@@ -984,7 +946,6 @@ F5::
 Return
 
 F7::
-
     Gosub, PauseMacro
     Reload
 Return

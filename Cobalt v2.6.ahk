@@ -669,7 +669,7 @@ ShowGui:
         y := paddingY + (itemH * row)
         gear := gearItems[A_Index]
         isChecked := arrContains(currentlyAllowedGear, gear) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w160 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
+        Gui, Add, Checkbox, x%x% y%y% w151 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
     }
 
     Gui, Tab, Eggs

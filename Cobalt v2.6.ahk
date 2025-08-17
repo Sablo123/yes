@@ -1,10 +1,11 @@
 #SingleInstance, force
 
-global version := "v2.5"
+global version := "v2.6"
 
 global privateServerLink := ""
 global webhookURL := ""
 global discordID := ""
+global longRecon := false
 
 ; -------- Configurable Variables --------
 global uiNavKeybind := "\"
@@ -17,7 +18,7 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
     , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
-    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry"]
+    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry","Romanesco"]
 
 ; Edit this to change the gear
 global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
@@ -186,7 +187,7 @@ GearCycle:
     }
     Sleep, 500
 
-    SafeClickRelative(0.9, 0.4)
+    SafeClickRelative(0.9, 0.5)
 
     Sleep, 3000
 
@@ -272,6 +273,9 @@ reconnect() {
     Sleep, 1000
     WinClose, ahk_exe RobloxPlayerBeta.exe
     Sleep, 3000
+    if(longRecon) {
+        Sleep, 3*60 *1000
+    }
     Run, %privateServerLink%
     Sleep, 45000
     SendInput, {tab}
@@ -347,7 +351,7 @@ goShoppingEgg(arr, allArr) {
         messageQueue.Push("Bought nothing...")
     }
     repeatKey("Up", 40)
-    keyEncoder("LLLLURRRRRDEE")
+    keyEncoder("ULLURRRRRDWRWRWRWRWLWRWE")
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
@@ -371,12 +375,12 @@ isThereStock() {
 isShopOpen() {
     Sleep, 50
 
-    ; 1. every other shop
-    ; 2. event and egg
-    return colorDetect(0x50240c) || colorDetect(0x360805)
+    ; 1. every other shop bg OR event and egg bg
+    ; 3. check no large block of disconnect pixels exist
+    return (colorDetect(0x50240c) || colorDetect(0x360805)) && !disconnectColorCheck()
 }
 
-colorDetect(c) {
+colorDetect(c, v := 10) {
     startXPercent := 40
     startYPercent := 27
     endXPercent := 60
@@ -389,9 +393,31 @@ colorDetect(c) {
     x2 := Round((endXPercent / 100) * A_ScreenWidth)
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
-    PixelSearch, px, py, x1, y1, x2, y2, c, 10, Fast RGB
-    ; MouseMove, px, py ; uncomment to test colo(u)r detection
+    PixelSearch, px, py, x1, y1, x2, y2, c, v, Fast RGB
+    MouseMove, px, py ; uncomment to test colo(u)r detection
     if(ErrorLevel = 0) {
+        return true
+    }
+    return false
+}
+
+
+disconnectColorCheck() {
+    startXPercent := 40
+    startYPercent := 27
+    endXPercent := 60
+    endYPercent := 85
+
+    CoordMode, Pixel, Screen
+
+    x1 := Round((startXPercent / 100) * A_ScreenWidth)
+    y1 := Round((startYPercent / 100) * A_ScreenHeight)
+    x2 := Round((endXPercent / 100) * A_ScreenWidth)
+    y2 := Round((endYPercent / 100) * A_ScreenHeight)
+
+    ImageSearch, px, py, x1, y1, x2, y2, images/gray.png
+    if(ErrorLevel = 0) {
+        longRecon := true
         return true
     }
     return false
@@ -669,7 +695,7 @@ ShowGui:
         y := paddingY + (itemH * row)
         gear := gearItems[A_Index]
         isChecked := arrContains(currentlyAllowedGear, gear) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w160 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
+        Gui, Add, Checkbox, x%x% y%y% w151 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
     }
 
     Gui, Tab, Eggs

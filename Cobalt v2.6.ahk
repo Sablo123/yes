@@ -916,7 +916,8 @@ UpdateEggState:
 return
 
 Close:
-    sendDiscordMessage("Macro exited!", 16711680)
+    sendDiscordMessage(message, color :=0xff0000, ping :=false)
+    sendDiscordMessage("Macro Exited!",16711680,true)
 ExitApp
 return
 

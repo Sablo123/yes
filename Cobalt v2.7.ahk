@@ -277,8 +277,14 @@ reconnect() {
         Sleep, 180000 ; 3 minutes
         longRecon := false
     }
-    ; open the private server link, no this is not a phishing link or whatever, shut up antivirus
-    Run, %privateServerLink%
+
+    if(privateServerLink != "" && RegExMatch(privateServerLink, "^https?:\/\/(w{3}.)?roblox.com")) {
+        ; open the private server link, no this is not a phishing link or whatever, shut up antivirus
+        Run, %privateServerLink%
+    } else {
+        MsgBox, 4112, No Private Server Link, No valid private server link was provided! Cannot restart the macro!
+    }
+
     Sleep, 45000
     SendInput, {tab}
     Sleep, 1000
@@ -636,7 +642,7 @@ ShowGui:
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
     Gui, Show, w550 h410, Cobalt %version%
-    
+
     cols := 3
     itemW := 150
     itemH := 28
@@ -750,7 +756,7 @@ ShowGui:
     Gui, Add, Button, h30 w215 x50 y300 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y300 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-    
+
     Gui, Tab, Credits
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%

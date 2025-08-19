@@ -642,7 +642,7 @@ ShowGui:
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
     Gui, Show, w550 h410, Cobalt %version%
-
+    
     cols := 3
     itemW := 150
     itemH := 28
@@ -751,12 +751,13 @@ ShowGui:
     Gosub, UpdatePerfSetting
 
     navIndex := indexOf(["\", "#", "Tab"], uiNavKeybind)
+    Gosub, UpdateNavKeybind
     Gui, Add, DropDownList, w185 x315 y145 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui  Add, DropDownList, w185 x315 y175 vnavBind Choose%navIndex% gUpdateNavKeybind, \|#|Tab
     Gui, Add, Button, h30 w215 x50 y300 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y300 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-
+    
     Gui, Tab, Credits
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%

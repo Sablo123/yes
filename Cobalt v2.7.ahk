@@ -750,7 +750,7 @@ ShowGui:
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
-    navIndex := indexOf(["\", "#", "Tab"], uiNavKeybind)
+    navIndex := indexOf(["\", "#", "]"], uiNavKeybind)
     Gosub, UpdateNavKeybind
     Gui, Add, DropDownList, w185 x315 y145 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui  Add, DropDownList, w185 x315 y175 vnavBind Choose%navIndex% gUpdateNavKeybind, \|#|Tab
@@ -816,8 +816,8 @@ UpdateNavKeybind:
         uiNavKeybind := "\"
     } else if (navBind = "#") {
         uiNavKeybind := "#"
-    } else if (navBind = "Tab") {
-        uiNavKeybind := "tab"
+    } else if (navBind = "]") {
+        uiNavKeybind := "]"
     }
     saveValues()
 Return

@@ -753,7 +753,7 @@ ShowGui:
     navIndex := indexOf(["\", "#", "]"], uiNavKeybind)
     Gosub, UpdateNavKeybind
     Gui, Add, DropDownList, w185 x315 y145 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
-    Gui  Add, DropDownList, w185 x315 y175 vnavBind Choose%navIndex% gUpdateNavKeybind, \|#|Tab
+    Gui  Add, DropDownList, w185 x315 y175 vnavBind Choose%navIndex% gUpdateNavKeybind, \|#|]
     Gui, Add, Button, h30 w215 x50 y300 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y300 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI

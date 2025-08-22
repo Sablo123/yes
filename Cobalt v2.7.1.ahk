@@ -288,7 +288,7 @@ reconnect() {
 
 exitIfWindowDies() {
     if(!WinExist("ahk_exe RobloxPlayerBeta.exe")) {
-        Gosub, GuiClose
+        Gosub, Close
     }
 }
 
@@ -644,11 +644,20 @@ arrayToString(arr, delimiter := ", ") {
 
 ShowGui:
     loadValues()
-    Gui, +Caption +SysMenu +MinimizeBox
+    Gui, +Caption +SysMenu +MinimizeBox +Resize
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Show, w550 h410, Cobalt %version%
-    
+    Gui, Add, Text, x10 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt %version%
+    Gui, Add, Text, x490 y0 w40 h25 vCloseBtn gClose Border Center hwndhCloseBtn
+    GuiControl,, CloseBtn, X
+    GuiControl, +BackgroundFF4444, CloseBtn
+    Gui, Show, w520 h430, Cobalt %version%
+    Sleep, 100
+    WinGet, hwnd, ID, Cobalt %version%
+    style := DllCall("GetWindowLong", "Ptr", hwnd, "Int", -16, "UInt")
+    style := style & ~0xC00000 & ~0x800000 & ~0x100000 & ~0x40000
+    DllCall("SetWindowLong", "Ptr", hwnd, "Int", -16, "UInt", style)
+    DllCall("SetWindowPos", "Ptr", hwnd, "Ptr", 0, 0, 0, 0, 0, 0, 0x27)
     cols := 3
     itemW := 150
     itemH := 28
@@ -656,17 +665,17 @@ ShowGui:
     paddingY := 80
 
     groupBoxX := 30
-    groupBoxY := 30
+    groupBoxY := 90
     groupBoxW := 490
     groupBoxH := 320
 
-    Gui, Add, Tab3, x10 y0 w530 h400, Seeds|Gear|Eggs|Ping List|Settings|Credits
+    Gui, Add, Tab3, x10 y35 w520 h400, Seeds|Gear|Eggs|Ping List|Settings|Credits
 
     Gui, Tab, Seeds
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
 
-    Gui, Add, Checkbox, x205 y45 w150 h23 c1C96EF vCheckAllSeeds gToggleAllSeeds, Select All Seeds
+    Gui, Add, Checkbox, x205 y105 w150 h23 c1C96EF vCheckAllSeeds gToggleAllSeeds, Select All Seeds
 
     paddingY := groupBoxY + 50
     paddingX := groupBoxX + 25
@@ -684,7 +693,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
 
-    Gui, Add, Checkbox, x205 y45 w150 h23 c32FF32 vCheckAllGear gToggleAllGear, Select All Gear
+    Gui, Add, Checkbox, x205 y105 w150 h23 c32FF32 vCheckAllGear gToggleAllGear, Select All Gear
 
     paddingY := groupBoxY + 50
     paddingX := groupBoxX + 25
@@ -702,7 +711,7 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
 
-    Gui, Add, Checkbox, x55 y45 w150 h23 vCheckAllEggs gToggleAllEggs cFFFF28, Select All Eggs
+    Gui, Add, Checkbox, x55 y105 w150 h23 vCheckAllEggs gToggleAllEggs cFFFF28, Select All Eggs
 
     paddingY := groupBoxY + 50
     paddingX := groupBoxX + 25
@@ -719,7 +728,7 @@ ShowGui:
 
     ; ! experimental ping list, disable this before hotfix!
     Gui, Tab, Ping List
-    Gui, Add, ListView, r15 w500 BackgroundBlack gAddToPingList Checked NoSort AltSubmit -Hdr vPingListLV, Ping List
+    Gui, Add, ListView, r15 x30 y90 w%groupBoxW% BackgroundBlack gAddToPingList Checked NoSort AltSubmit -Hdr vPingListLV, Ping List
 
     LV_Delete()
     GuiControl, -Redraw, PingListLV  ; suspend redraw for speed and reliability
@@ -741,43 +750,43 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
 
-    Gui, Add, Text, x50 y55 w150 h30, Private Server Link
-    Gui, Add, Text, x50 y85 w150 h30, Webhook URL
-    Gui, Add, Text, x50 y115 w150 h30, Discord User ID
-    Gui, Add, Text, x50 y145 w150 h30, Performance Setting
-    Gui, Add, Text, x50 y175 w150 h30, UI Navigation Keybind
+    Gui, Add, Text, x50 y125 w150 h30, Private Server Link
+    Gui, Add, Text, x50 y155 w150 h30, Webhook URL
+    Gui, Add, Text, x50 y185 w150 h30, Discord User ID
+    Gui, Add, Text, x50 y235 w150 h30, Performance Setting
+    Gui, Add, Text, x50 y265 w150 h30, UI Navigation Keybind
     Gui, Font, s6 cGray, Segoe UI
-    Gui, Add, Link, x50 y135 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
-    Gui, Font, s8 cBlack, Segoe UI
 
-    Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y55, % privateServerLink
-    Gui, Add, Edit, gUpdatePlayerValues r1 vwebhookURL w185 x315 y85, % webhookURL
-    Gui, Add, Edit, gUpdatePlayerValues r1 vdiscordID w185 x315 y115, % discordID
+    Gui, Add, Link, x50 y205 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
+    Gui, Font, s8 cBlack, Segoe UI
+    Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y125, % privateServerLink
+    Gui, Add, Edit, gUpdatePlayerValues r1 vwebhookURL w185 x315 y155, % webhookURL
+    Gui, Add, Edit, gUpdatePlayerValues r1 vdiscordID w185 x315 y185, % discordID
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
-    Gui, Add, DropDownList, w185 x315 y145 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
-    Gui  Add, Edit, w185 x315 y175 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
-    Gui, Add, Button, h30 w215 x50 y300 gGuiStartMacro, Start Macro (F5)
-    Gui, Add, Button, h30 w215 x285 y300 gPauseMacro, Stop Macro (F7)
+    Gui  Add, Edit, w185 x315 y265 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
+    Gui, Add, DropDownList, w185 x315 y235 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
+    Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
+    Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
     
     Gui, Tab, Credits
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
-    Gui, Font, s10 cWhite w600, Segoe UI
-    Gui, Add, Text, x50 y50 w330 h30, Cobalt %version% by Clovalt, Cobblestone
-    Gui, Add, Picture, x50 y90 w100 h100, images/cobble.png
-    Gui, Add, Text, x50 y190 w150 h100, Cobble (Cobblestone)
-    Gui, Add, Picture, x250 y90 w100 h100, images/clovalt.png
-    Gui, Add, Text, x250 y190 w150 h100, Clovalt
+
+    Gui, Add, Text, x50 y110 w330 h30, Cobalt %version% by Clovalt, Cobblestone
+    Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
+    Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
+    Gui, Add, Picture, x250 y150 w100 h100, images/clovalt.png
+    Gui, Add, Text, x250 y250 w150 h100, Clovalt
     Gui, Font, s8 cfb2c36, Segoe UI
-    Gui, Add, Text, x50 y210 w150 h100, Macro Developer
+    Gui, Add, Text, x50 y270 w150 h100, Macro Developer
     Gui, Font, s8 cBlue, Segoe UI
-    Gui, Add, Text, x250 y210 w150 h100, Macro Developer and Project Lead
-    Gui, Add, Link, x50 y250 w150 h30, <a href="https://madefrom.rocks">Website</a>
-    Gui, Add, Link, x50 y280 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
-    Gui, Add, Link, x250 y250 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
+    Gui, Add, Text, x250 y270 w150 h100, Macro Developer and Project Lead
+    Gui, Add, Link, x50 y310 w150 h30, <a href="https://madefrom.rocks">Website</a>
+    Gui, Add, Link, x50 y330 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
+    Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
 AddToPingList:
@@ -834,11 +843,13 @@ UpdatePlayerValues:
 Return
 
 loadValues() {
-    IniRead, webhookURL, config.ini, PlayerConf, webhookURL
-    IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink
-    IniRead, discordID, config.ini, PlayerConf, discordID
-    IniRead, perfSetting, config.ini, PlayerConf, perfSetting
-    IniRead, uiNavKeybind, config.ini, PlayerConf, uiNavKeybind
+    AutoTrim, On
+    IniRead, webhookURL, config.ini, PlayerConf, webhookURL, %A_Space%
+    IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink, %A_Space%
+    IniRead, discordID, config.ini, PlayerConf, discordID, %A_Space%
+    IniRead, perfSetting, config.ini, PlayerConf, perfSetting, Default
+    IniRead, uiNavKeybindStr, config.ini, PlayerConf, uiNavKeybind
+    AutoTrim, Off
 
     IniRead, currentlyAllowedSeedsStr, config.ini, PersistentData, currentlyAllowedSeeds
     IniRead, currentlyAllowedGearStr, config.ini, PersistentData, currentlyAllowedGear
@@ -848,6 +859,12 @@ loadValues() {
 
     if(pingListStr != "" and pingListStr != "ERROR") {
         pingList := StrSplit(pingListStr, ", ")
+    }
+
+    if(uiNavKeybindStr != "" and uiNavKeybindStr != "ERROR") {
+        uiNavKeybind := uiNavKeybindStr
+    } else {
+        uiNavKeybind := "\"
     }
 
     if (currentlyAllowedSeedsStr != "")
@@ -945,7 +962,7 @@ UpdateEggState:
     saveValues()
 return
 
-GuiClose:
+Close:
     sendDiscordMessage("Macro Exited!", 16711680, true)
 ExitApp
 return

@@ -1,6 +1,6 @@
 #SingleInstance, force
 
-global version := "v2.7"
+global version := "v2.7.1"
 
 global privateServerLink := ""
 global webhookURL := ""
@@ -81,15 +81,7 @@ Alignment:
     exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
-    startInvAction()
-    startUINav()
-    keyEncoder("E")
-    startInvAction()
-    startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
-    keyEncoder("RERRRDDRRRUUUE")
-    repeatKey("Backspace", 30)
-    typeString("recall")
+    searchItem("recall")
     keyEncoder("EDUUEDRE")
     ; close it
     startInvAction()
@@ -327,6 +319,7 @@ ShowTimeTip:
 Return
 
 goShopping(arr, allArr, spamCount := 50) {
+    keyEncoder("RRRR")
     repeatKey("Up", 40)
     keyEncoder("LLRDRD")
     for index, item in allArr {
@@ -345,6 +338,7 @@ goShopping(arr, allArr, spamCount := 50) {
 }
 
 goShoppingEgg(arr, allArr) {
+    keyEncoder("RRRR")
     repeatKey("Up", 40)
     keyEncoder("LLLLURRRRRDD")
     for index, item in allArr {
@@ -619,6 +613,18 @@ sendDiscordMessage(message, color := 0x0000FF, ping := false) {
 
 }
 
+searchItem(item) {
+    startInvAction()
+    startUINav()
+    keyEncoder("E")
+    startInvAction()
+    startUINav()
+    keyEncoder("ULLULLULLULLULLULL")
+    keyEncoder("RERRRDDRRRUUUE")
+    repeatKey("Backspace", 30)
+    typeString(item)
+}
+
 arrayToString(arr, delimiter := ", ") {
     local result := ""
 
@@ -750,10 +756,8 @@ ShowGui:
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
-    navIndex := indexOf(["\", "#", "]"], uiNavKeybind)
-    Gosub, UpdateNavKeybind
     Gui, Add, DropDownList, w185 x315 y145 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
-    Gui  Add, DropDownList, w185 x315 y175 vnavBind Choose%navIndex% gUpdateNavKeybind, \|#|Tab
+    Gui  Add, Edit, w185 x315 y175 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
     Gui, Add, Button, h30 w215 x50 y300 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y300 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
@@ -809,25 +813,14 @@ UpdatePerfSetting:
     }
     saveValues()
 Return
-
-UpdateNavKeybind:
-    Gui, Submit, NoHide
-    if (navBind = "\"){
-        uiNavKeybind := "\"
-    } else if (navBind = "#") {
-        uiNavKeybind := "#"
-    } else if (navBind = "]") {
-        uiNavKeybind := "]"
-    }
-    saveValues()
-Return
-
+    
 UpdatePlayerValues:
     Gui, Submit, NoHide
-
+    
     privateServerLink := Trim(privateServerLink)
     webhookURL := Trim(webhookURL)
     discordID := Trim(discordID)
+    uiNavKeybind := Trim(uiNavKeybind)
 
     if(RegExMatch(discordID, "\D")) {
         tooltipLog("Your Discord ID must only contain numbers")

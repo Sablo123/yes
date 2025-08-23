@@ -6,6 +6,7 @@ global privateServerLink := ""
 global webhookURL := ""
 global discordID := ""
 global longRecon := false
+global adminAbuse := false
 
 ; -------- Configurable Variables --------
 global uiNavKeybind := "\"
@@ -290,13 +291,15 @@ ShowTimeTip:
     RemainingSecs30 := Mod(SecondsUntil30, 60)
     FormattedTime30 := Format("{:02}:{:02}", RemainingMins30, RemainingSecs30)
 
-    ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%
-
-    if (SecondsUntil30 < 3) {
+    if(!adminAbuse) {
+        ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%
+    }
+    
+    if (SecondsUntil30 < 3 || adminAbuse) {
         canDoEgg := true
     }
 
-    if (!AdminAbuse && SecondsUntil5 < 3) {
+    if (SecondsUntil5 < 3 || adminAbuse) {
         finished := false
         recalibrateCameraDistance()
         Gosub, Alignment
@@ -791,7 +794,7 @@ ShowGui:
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-    ;Gui, Add, Checkbox, x50 y295 w151 h23 vAdminAbuse gToggleAdminAbuse, Admin Abuse 
+    Gui, Add, Checkbox, x50 y295 w151 h23 vadminAbuse, Admin Abuse 
 
     
     Gui, Tab, Credits
@@ -984,14 +987,6 @@ UpdateEggState:
     }
     saveValues()
 return
-
-ToggleAdminAbuse:
-    Gui, Submit, NoHide
-    saveValues()
-return
-
-
-
 
 Close:
     sendDiscordMessage("Macro Exited!", 16711680, true)

@@ -161,7 +161,7 @@ SeedCycle:
     }
 
 GearCycle:
-    GearCycle:
+
     exitIfWindowDies()
     if (currentlyAllowedGear.Length() = 0) {
         Gosub, EggCycle

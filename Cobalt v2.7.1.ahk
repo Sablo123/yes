@@ -161,6 +161,7 @@ SeedCycle:
     }
 
 GearCycle:
+    GearCycle:
     exitIfWindowDies()
     if (currentlyAllowedGear.Length() = 0) {
         Gosub, EggCycle
@@ -171,18 +172,7 @@ GearCycle:
 
     tooltipLog("Opening gear shop...")
     SendInput, e
-    Sleep, 3000
-
-    Loop, 5 {
-        Send, {WheelUp}
-        Sleep, 10
-    }
-    Sleep, 500
-
-    SafeClickRelative(0.9, 0.5)
-
-    Sleep, 3000
-
+       Sleep, 3000
     if(isShopOpen()) {
         startUINav()
         tooltipLog("Shopping for gear...")
@@ -190,15 +180,12 @@ GearCycle:
         sendDiscordQueue("Gear Shop")
         startUINav()
         Sleep, 100
-        Loop, 5 {
-            Send, {WheelDown}
-            Sleep, 10
-        }
     } else {
         tooltipLog("Error: Gear shop did not open")
         sendDiscordMessage("Gear shop did not open! Reconnecting...", 16711680)
         reconnect()
     }
+
 
 EggCycle:
     exitIfWindowDies()

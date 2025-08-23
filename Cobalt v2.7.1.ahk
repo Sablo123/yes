@@ -1,10 +1,11 @@
 #SingleInstance, force
 
-global version := "v2.5"
+global version := "v2.7.1"
 
 global privateServerLink := ""
 global webhookURL := ""
 global discordID := ""
+global longRecon := false
 
 ; -------- Configurable Variables --------
 global uiNavKeybind := "\"
@@ -17,7 +18,7 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
     , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
     , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
     , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
-    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry"]
+    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry","Romanesco"]
 
 ; Edit this to change the gear
 global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
@@ -80,15 +81,7 @@ Alignment:
     exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
-    startInvAction()
-    startUINav()
-    keyEncoder("E")
-    startInvAction()
-    startUINav()
-    keyEncoder("ULLULLULLULLULLULL")
-    keyEncoder("RERRRDDRRRUUUE")
-    repeatKey("Backspace", 30)
-    typeString("recall")
+    searchItem("recall")
     keyEncoder("EDUUEDRE")
     ; close it
     startInvAction()
@@ -129,7 +122,7 @@ Alignment:
     repeatKey("Esc")
     sleep, 500
     startUINav()
-    keyEncoder("ULLULLULLULLULLULLRRRRELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
+    keyEncoder("ULLULLULLULLULLULLRRRRRRLELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
     startUINav()
     repeatKey("Esc")
     sleep, 100
@@ -150,7 +143,7 @@ SeedCycle:
     startUINav()
     ;open shop
     sleep, 1000
-    keyEncoder("ULLULLULLULLULLULLWRRREW")
+    keyEncoder("ULLULLULLULLULLULLWRRRRRLLEW")
     SendInput, e
     startUINav()
     startUINav()
@@ -168,6 +161,7 @@ SeedCycle:
     }
 
 GearCycle:
+
     exitIfWindowDies()
     if (currentlyAllowedGear.Length() = 0) {
         Gosub, EggCycle
@@ -178,18 +172,7 @@ GearCycle:
 
     tooltipLog("Opening gear shop...")
     SendInput, e
-    Sleep, 3000
-
-    Loop, 5 {
-        Send, {WheelUp}
-        Sleep, 10
-    }
-    Sleep, 500
-
-    SafeClickRelative(0.9, 0.4)
-
-    Sleep, 3000
-
+       Sleep, 3000
     if(isShopOpen()) {
         startUINav()
         tooltipLog("Shopping for gear...")
@@ -197,15 +180,12 @@ GearCycle:
         sendDiscordQueue("Gear Shop")
         startUINav()
         Sleep, 100
-        Loop, 5 {
-            Send, {WheelDown}
-            Sleep, 10
-        }
     } else {
         tooltipLog("Error: Gear shop did not open")
         sendDiscordMessage("Gear shop did not open! Reconnecting...", 16711680)
         reconnect()
     }
+
 
 EggCycle:
     exitIfWindowDies()
@@ -272,7 +252,18 @@ reconnect() {
     Sleep, 1000
     WinClose, ahk_exe RobloxPlayerBeta.exe
     Sleep, 3000
-    Run, %privateServerLink%
+    if(longRecon) {
+        Sleep, 180000 ; 3 minutes
+        longRecon := false
+    }
+
+    if(privateServerLink != "" && RegExMatch(privateServerLink, "^https?:\/\/(w{3}.)?roblox.com")) {
+        ; open the private server link, no this is not a phishing link or whatever, shut up antivirus
+        Run, %privateServerLink%
+    } else {
+        MsgBox, 4112, No Private Server Link, No valid private server link was provided! Cannot restart the macro!
+    }
+
     Sleep, 45000
     SendInput, {tab}
     Sleep, 1000
@@ -289,7 +280,6 @@ exitIfWindowDies() {
 }
 
 ShowTimeTip:
-
     SecondsUntil5 := 300 - (Mod(A_Min, 5) * 60 + A_Sec)
     SecondsUntil5 := Mod(SecondsUntil5, 301)
     RemainingMins5 := Floor(SecondsUntil5 / 60)
@@ -316,6 +306,7 @@ ShowTimeTip:
 Return
 
 goShopping(arr, allArr, spamCount := 50) {
+    keyEncoder("RRRR")
     repeatKey("Up", 40)
     keyEncoder("LLRDRD")
     for index, item in allArr {
@@ -334,6 +325,7 @@ goShopping(arr, allArr, spamCount := 50) {
 }
 
 goShoppingEgg(arr, allArr) {
+    keyEncoder("RRRR")
     repeatKey("Up", 40)
     keyEncoder("LLLLURRRRRDD")
     for index, item in allArr {
@@ -353,7 +345,6 @@ goShoppingEgg(arr, allArr) {
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
-    Sleep, 200
     if(isThereStock()) {
         if(item != "Trowel") {
             repeatKey("Left")
@@ -365,18 +356,19 @@ buyAllAvailable(spamCount := 50, item := "") {
 }
 
 isThereStock() {
+    Sleep, 200
     return colorDetect(0x20b41c) || colorDetect(0x26EE26)
 }
 
 isShopOpen() {
     Sleep, 50
 
-    ; 1. every other shop
-    ; 2. event and egg
-    return colorDetect(0x50240c) || colorDetect(0x360805)
+    ; 1. every other shop bg OR event and egg bg
+    ; 2. check no large block of disconnect pixels exist
+    return (colorDetect(0x50240c) || colorDetect(0x360805)) && !disconnectColorCheck()
 }
 
-colorDetect(c) {
+colorDetect(c, v := 10) {
     startXPercent := 40
     startYPercent := 27
     endXPercent := 60
@@ -389,9 +381,30 @@ colorDetect(c) {
     x2 := Round((endXPercent / 100) * A_ScreenWidth)
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
-    PixelSearch, px, py, x1, y1, x2, y2, c, 10, Fast RGB
+    PixelSearch, px, py, x1, y1, x2, y2, c, v, Fast RGB
     ; MouseMove, px, py ; uncomment to test colo(u)r detection
     if(ErrorLevel = 0) {
+        return true
+    }
+    return false
+}
+
+disconnectColorCheck() {
+    startXPercent := 40
+    startYPercent := 27
+    endXPercent := 60
+    endYPercent := 85
+
+    CoordMode, Pixel, Screen
+
+    x1 := Round((startXPercent / 100) * A_ScreenWidth)
+    y1 := Round((startYPercent / 100) * A_ScreenHeight)
+    x2 := Round((endXPercent / 100) * A_ScreenWidth)
+    y2 := Round((endYPercent / 100) * A_ScreenHeight)
+
+    ImageSearch, px, py, x1, y1, x2, y2, images/gray.png
+    if(ErrorLevel = 0) {
+        longRecon := true
         return true
     }
     return false
@@ -587,6 +600,18 @@ sendDiscordMessage(message, color := 0x0000FF, ping := false) {
 
 }
 
+searchItem(item) {
+    startInvAction()
+    startUINav()
+    keyEncoder("E")
+    startInvAction()
+    startUINav()
+    keyEncoder("ULLULLULLULLULLULL")
+    keyEncoder("RERRRDDRRRUUUE")
+    repeatKey("Backspace", 30)
+    typeString(item)
+}
+
 arrayToString(arr, delimiter := ", ") {
     local result := ""
 
@@ -609,13 +634,10 @@ ShowGui:
     Gui, +Caption +SysMenu +MinimizeBox +Resize
     Gui, Color, c000000
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Text, x0 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt %version%
-    Gui, Add, Text, x490 y0 w30 h30 vCloseBtn gClose Center hwndhCloseBtn
+    Gui, Add, Text, x10 y0 w490 h30 BackgroundTrans vTitleBar gDrag, Cobalt %version%
+    Gui, Add, Text, x490 y0 w40 h25 vCloseBtn gClose Border Center hwndhCloseBtn
     GuiControl,, CloseBtn, X
     GuiControl, +BackgroundFF4444, CloseBtn
-    Gui, Add, Text, x460 y0 w30 h30 vMinBtn gMinimize Center hwndMinimize
-    GuiControl,, MinBtn, _
-    GuiControl, +BackgroundFFAA00, MinBtn
     Gui, Show, w520 h430, Cobalt %version%
     Sleep, 100
     WinGet, hwnd, ID, Cobalt %version%
@@ -669,7 +691,7 @@ ShowGui:
         y := paddingY + (itemH * row)
         gear := gearItems[A_Index]
         isChecked := arrContains(currentlyAllowedGear, gear) ? 1 : 0
-        Gui, Add, Checkbox, x%x% y%y% w160 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
+        Gui, Add, Checkbox, x%x% y%y% w151 h23 gUpdateGearState vgearCheckboxes%A_Index% Checked%isChecked%, % gear
     }
 
     Gui, Tab, Eggs
@@ -693,11 +715,10 @@ ShowGui:
 
     ; ! experimental ping list, disable this before hotfix!
     Gui, Tab, Ping List
-    Gui, Add, ListView, r17 w500 BackgroundBlack gAddToPingList Checked NoSort AltSubmit -Hdr vPingListLV, Ping List
+    Gui, Add, ListView, r15 x30 y90 w%groupBoxW% BackgroundBlack gAddToPingList Checked NoSort AltSubmit -Hdr vPingListLV, Ping List
 
     LV_Delete()
     GuiControl, -Redraw, PingListLV  ; suspend redraw for speed and reliability
-    ; thank you chatgpt :heart:
 
     Loop % allList.Length() {
         LV_Add("", allList[A_Index]) ; no check state yet
@@ -720,7 +741,9 @@ ShowGui:
     Gui, Add, Text, x50 y155 w150 h30, Webhook URL
     Gui, Add, Text, x50 y185 w150 h30, Discord User ID
     Gui, Add, Text, x50 y235 w150 h30, Performance Setting
+    Gui, Add, Text, x50 y265 w150 h30, UI Navigation Keybind
     Gui, Font, s6 cGray, Segoe UI
+
     Gui, Add, Link, x50 y205 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
     Gui, Font, s8 cBlack, Segoe UI
     Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y125, % privateServerLink
@@ -729,15 +752,16 @@ ShowGui:
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
+    Gui  Add, Edit, w185 x315 y265 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
     Gui, Add, DropDownList, w185 x315 y235 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-
+    
     Gui, Tab, Credits
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
-    Gui, Font, s10 cWhite w600, Segoe UI
+
     Gui, Add, Text, x50 y110 w330 h30, Cobalt %version% by Clovalt, Cobblestone
     Gui, Add, Picture, x50 y150 w100 h100, images/cobble.png
     Gui, Add, Text, x50 y250 w150 h100, Cobble (Cobblestone)
@@ -749,8 +773,7 @@ ShowGui:
     Gui, Add, Text, x250 y270 w150 h100, Macro Developer and Project Lead
     Gui, Add, Link, x50 y310 w150 h30, <a href="https://madefrom.rocks">Website</a>
     Gui, Add, Link, x50 y330 w150 h30, <a href="https://github.com/HoodieRocks">Github</a>
-    Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/qsJ4mT3C4Z">Main Discord Server</a>
-    Gui, Add, Link, x250 y330 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
+    Gui, Add, Link, x250 y310 w150 h30, <a href="https://discord.gg/Fb4BBXxV9r">Macro Discord Server</a>
 return
 
 AddToPingList:
@@ -786,13 +809,14 @@ UpdatePerfSetting:
     }
     saveValues()
 Return
-
+    
 UpdatePlayerValues:
     Gui, Submit, NoHide
-
+    
     privateServerLink := Trim(privateServerLink)
     webhookURL := Trim(webhookURL)
     discordID := Trim(discordID)
+    uiNavKeybind := Trim(uiNavKeybind)
 
     if(RegExMatch(discordID, "\D")) {
         tooltipLog("Your Discord ID must only contain numbers")
@@ -806,10 +830,13 @@ UpdatePlayerValues:
 Return
 
 loadValues() {
-    IniRead, webhookURL, config.ini, PlayerConf, webhookURL
-    IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink
-    IniRead, discordID, config.ini, PlayerConf, discordID
-    IniRead, perfSetting, config.ini, PlayerConf, perfSetting
+    AutoTrim, On
+    IniRead, webhookURL, config.ini, PlayerConf, webhookURL, %A_Space%
+    IniRead, privateServerLink, config.ini, PlayerConf, privateServerLink, %A_Space%
+    IniRead, discordID, config.ini, PlayerConf, discordID, %A_Space%
+    IniRead, perfSetting, config.ini, PlayerConf, perfSetting, Default
+    IniRead, uiNavKeybindStr, config.ini, PlayerConf, uiNavKeybind
+    AutoTrim, Off
 
     IniRead, currentlyAllowedSeedsStr, config.ini, PersistentData, currentlyAllowedSeeds
     IniRead, currentlyAllowedGearStr, config.ini, PersistentData, currentlyAllowedGear
@@ -819,6 +846,12 @@ loadValues() {
 
     if(pingListStr != "" and pingListStr != "ERROR") {
         pingList := StrSplit(pingListStr, ", ")
+    }
+
+    if(uiNavKeybindStr != "" and uiNavKeybindStr != "ERROR") {
+        uiNavKeybind := uiNavKeybindStr
+    } else {
+        uiNavKeybind := "\"
     }
 
     if (currentlyAllowedSeedsStr != "")
@@ -843,6 +876,7 @@ saveValues() {
     IniWrite, %webhookURL%, config.ini, PlayerConf, webhookURL
     IniWrite, %discordID%, config.ini, PlayerConf, discordID
     IniWrite, %perfSetting%, config.ini, PlayerConf, perfSetting
+    IniWrite, %uiNavKeybind%, config.ini, PlayerConf, uiNavKeybind
 
     currentlyAllowedSeedsStr := arrayToString(currentlyAllowedSeeds)
     currentlyAllowedGearStr := arrayToString(currentlyAllowedGear)
@@ -916,7 +950,7 @@ UpdateEggState:
 return
 
 Close:
-    sendDiscordMessage("Macro exited!", 16711680)
+    sendDiscordMessage("Macro Exited!", 16711680, true)
 ExitApp
 return
 

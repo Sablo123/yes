@@ -2,16 +2,11 @@
 
 ## High Priority
 
-- Test the macro for a long period of times
-- Fix UI nav bugs caused by high display scale on laptops
-
 ---
 
 ## Low Priority
 
-- Auto Crafting
-- Organizing to be easy to find editable stuff
-- Network Quality setting that delays how long it will load on the loading screen
+- Auto Crafting (see #autocrafting)
 - Look into porting to AHKv2
 
 ---

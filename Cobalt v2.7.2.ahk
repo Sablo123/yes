@@ -418,7 +418,7 @@ goToEggClose() {
     startXPercent := 40
     startYPercent := 24
     endXPercent := 80
-    endYPercent := 85
+    endYPercent := 40
 
     CoordMode, Pixel, Screen
 
@@ -440,9 +440,13 @@ goToEggClose() {
     finalY := py + (0.01 * A_ScreenHeight)
     if(ErrorLevel = 0) {
         Click, %finalX%, %finalY%
-    } else {
+    } else if (ErrorLevel = 1) {
         tooltipLog("Error: Did not find egg shop close button")
         sendDiscordMessage("Did not find egg shop close button! Reconnecting...", 16711680)
+        reconnect()
+    } else if (ErrorLevel = 2) {
+        tooltipLog("Error: Failed to find search image (Redownload Macro!)")
+        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 16711680)
         reconnect()
     }
 }

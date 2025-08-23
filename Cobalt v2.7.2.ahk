@@ -791,7 +791,7 @@ ShowGui:
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Checkbox, x50 y295 w151 h23 vAdminAbuse gToggleAdminAbuse, Admin Abuse 
+    ;Gui, Add, Checkbox, x50 y295 w151 h23 vAdminAbuse gToggleAdminAbuse, Admin Abuse 
 
     
     Gui, Tab, Credits

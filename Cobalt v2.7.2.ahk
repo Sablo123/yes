@@ -1,6 +1,6 @@
 #SingleInstance, force
 
-global version := "v2.7.1"
+global version := "v2.7.2"
 
 global privateServerLink := ""
 global webhookURL := ""
@@ -24,13 +24,12 @@ global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
 global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
     , "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
     , "Medium Toy","Medium Treat", "Godly Sprinkler"
-    , "Magnifying Glass", "Master Sprinkler", "Cleaning Spray"
+    , "Magnifying Glass", "Master Sprinkler", "Cleaning Spray", "Cleansing Pet Shard"
     , "Favorite Tool", "Harvest Tool", "Friendship Pot"
     , "Grandmaster Sprinkler", "Levelup Lollipop"]
 
 ; Edit this to change the eggs
-global eggItems := ["Common Egg", "Common Sum Egg", "Rare Sum Egg"
-    , "Mythical Egg", "Paradise Egg" ,"Bug Egg"]
+global eggItems := ["Common Egg", "Uncommon Egg", "Rare Egg", "Legendarry Egg", "Mythical Egg", "Bug Egg"]
 
 ; Edit this to change what you want to be pinged for
 global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed","Elder Strawberry", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
@@ -66,7 +65,6 @@ global sleepPerf := 200
 global perfSetting := "Default"
 
 WinActivate, ahk_exe RobloxPlayerBeta.exe
-
 Gosub, ShowGui
 
 StartMacro:
@@ -161,7 +159,6 @@ SeedCycle:
     }
 
 GearCycle:
-
     exitIfWindowDies()
     if (currentlyAllowedGear.Length() = 0) {
         Gosub, EggCycle
@@ -172,7 +169,7 @@ GearCycle:
 
     tooltipLog("Opening gear shop...")
     SendInput, e
-       Sleep, 3000
+    Sleep, 3000
     if(isShopOpen()) {
         startUINav()
         tooltipLog("Shopping for gear...")
@@ -185,7 +182,6 @@ GearCycle:
         sendDiscordMessage("Gear shop did not open! Reconnecting...", 16711680)
         reconnect()
     }
-
 
 EggCycle:
     exitIfWindowDies()
@@ -280,6 +276,8 @@ exitIfWindowDies() {
 }
 
 ShowTimeTip:
+    Gui, Submit, NoHide  ; Ensure checkbox state is current
+
     SecondsUntil5 := 300 - (Mod(A_Min, 5) * 60 + A_Sec)
     SecondsUntil5 := Mod(SecondsUntil5, 301)
     RemainingMins5 := Floor(SecondsUntil5 / 60)
@@ -298,7 +296,7 @@ ShowTimeTip:
         canDoEgg := true
     }
 
-    if (SecondsUntil5 < 3) {
+    if (!AdminAbuse && SecondsUntil5 < 3) {
         finished := false
         recalibrateCameraDistance()
         Gosub, Alignment
@@ -327,7 +325,7 @@ goShopping(arr, allArr, spamCount := 50) {
 goShoppingEgg(arr, allArr) {
     keyEncoder("RRRR")
     repeatKey("Up", 40)
-    keyEncoder("LLLLURRRRRDD")
+    keyEncoder("R")
     for index, item in allArr {
         if(!arrContains(arr, item)) {
             repeatKey("Down")
@@ -338,17 +336,19 @@ goShoppingEgg(arr, allArr) {
     if(messageQueue.Length() = 0) {
         messageQueue.Push("Bought nothing...")
     }
-    repeatKey("Up", 40)
-    keyEncoder("ULLURRRRRDWRWRWRWRWLWRWE")
+    ; repeatKey("Up", 40)
+    ; keyEncoder("ULLURRRRDRE")
+    ; SafeClickRelative(0.68, 0.28)
+    goToEggClose()
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
-    if(isThereStock()) {
+    if(isThereStock()) {  
         if(item != "Trowel") {
             repeatKey("Left")
-        }
+        }  
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
@@ -402,12 +402,46 @@ disconnectColorCheck() {
     x2 := Round((endXPercent / 100) * A_ScreenWidth)
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
-    ImageSearch, px, py, x1, y1, x2, y2, images/gray.png
+    ImageSearch, px, py, x1, y1, x2, y2, *3 images/gray.png
     if(ErrorLevel = 0) {
         longRecon := true
         return true
     }
     return false
+}
+
+; only for get because it might be inconsistent
+goToEggClose() {
+    startXPercent := 40
+    startYPercent := 24
+    endXPercent := 80
+    endYPercent := 85
+
+    CoordMode, Pixel, Screen
+
+    x1 := Round((startXPercent / 100) * A_ScreenWidth)
+    y1 := Round((startYPercent / 100) * A_ScreenHeight)
+    x2 := Round((endXPercent / 100) * A_ScreenWidth)
+    y2 := Round((endYPercent / 100) * A_ScreenHeight)
+
+    ImageSearch, px, py, x1, y1, x2, y2, *10 images/close.png
+    finalX := px + (0.01 * A_ScreenWidth)
+    finalY := py + (0.01 * A_ScreenHeight)
+    if(ErrorLevel = 0) {
+        Click, %finalX%, %finalY%
+        return
+    }
+    
+    ImageSearch, px, py, x1, y1, x2, y2, *10 images/close_hover.png
+    finalX := px + (0.01 * A_ScreenWidth)
+    finalY := py + (0.01 * A_ScreenHeight)
+    if(ErrorLevel = 0) {
+        Click, %finalX%, %finalY%
+    } else {
+        tooltipLog("Error: Did not find egg shop close button")
+        sendDiscordMessage("Did not find egg shop close button! Reconnecting...", 16711680)
+        reconnect()
+    }
 }
 
 SafeMoveRelative(xRatio, yRatio) {
@@ -757,6 +791,8 @@ ShowGui:
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
+    Gui, Add, Checkbox, x50 y295 w151 h23 vAdminAbuse gToggleAdminAbuse, Admin Abuse 
+
     
     Gui, Tab, Credits
     Gui, Font, s10
@@ -948,6 +984,14 @@ UpdateEggState:
     }
     saveValues()
 return
+
+ToggleAdminAbuse:
+    Gui, Submit, NoHide
+    saveValues()
+return
+
+
+
 
 Close:
     sendDiscordMessage("Macro Exited!", 16711680, true)

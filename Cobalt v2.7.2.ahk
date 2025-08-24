@@ -415,41 +415,12 @@ disconnectColorCheck() {
 
 ; only for get because it might be inconsistent
 goToEggClose() {
-    startXPercent := 40
-    startYPercent := 24
-    endXPercent := 80
-    endYPercent := 40
-
-    CoordMode, Pixel, Screen
-
-    x1 := Round((startXPercent / 100) * A_ScreenWidth)
-    y1 := Round((startYPercent / 100) * A_ScreenHeight)
-    x2 := Round((endXPercent / 100) * A_ScreenWidth)
-    y2 := Round((endYPercent / 100) * A_ScreenHeight)
-
-    ImageSearch, px, py, x1, y1, x2, y2, *10 images/close.png
-    finalX := px + (0.01 * A_ScreenWidth)
-    finalY := py + (0.01 * A_ScreenHeight)
-    if(ErrorLevel = 0) {
-        Click, %finalX%, %finalY%
-        return
+  SafeClickRelative(0.68, 0.28)
+  Sleep 100
+  SafeClickRelative(0.67, 0.29)
+  Sleep 100
+  SafeClickRelative(0.66, 0.29)
     }
-    
-    ImageSearch, px, py, x1, y1, x2, y2, *10 images/close_hover.png
-    finalX := px + (0.01 * A_ScreenWidth)
-    finalY := py + (0.01 * A_ScreenHeight)
-    if(ErrorLevel = 0) {
-        Click, %finalX%, %finalY%
-    } else if (ErrorLevel = 1) {
-        tooltipLog("Error: Did not find egg shop close button")
-        sendDiscordMessage("Did not find egg shop close button! Reconnecting...", 16711680)
-        reconnect()
-    } else if (ErrorLevel = 2) {
-        tooltipLog("Error: Failed to find search image (Redownload Macro!)")
-        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 16711680)
-        reconnect()
-    }
-}
 
 SafeMoveRelative(xRatio, yRatio) {
     if !WinExist("ahk_exe RobloxPlayerBeta.exe") {

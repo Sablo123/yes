@@ -1,6 +1,6 @@
 #SingleInstance, force
 
-global version := "v2.7.3a"
+global version := "v2.7.4"
 
 global privateServerLink := ""
 global webhookURL := ""

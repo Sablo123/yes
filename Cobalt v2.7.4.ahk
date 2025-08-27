@@ -113,22 +113,22 @@ Alignment:
     Click, Right, Up
     Sleep, 100
 
-    repeatKey("Esc")
+    repeatKey("esc")
     sleep, 100
-    repeatKey("Tab")
+    repeatKey("tab")
     sleep, 100
     keyEncoder("UUUUUUUUUUUDRRW")
-    repeatKey("Esc")
+    repeatKey("esc")
     sleep, 500
     startUINav()
     keyEncoder("ULLULLULLULLULLULLRRRRRRLELERRELLRELERRELLRELERRELLRELERRELLRELERRELLW")
     startUINav()
-    repeatKey("Esc")
+    repeatKey("esc")
     sleep, 100
-    repeatKey("Tab")
+    repeatKey("tab")
     sleep, 100
     keyEncoder("UUUUUUUUUUUDRRW")
-    repeatKey("Esc")
+    repeatKey("esc")
     keyEncoder("WDREWW")
     tooltipLog("Alignment complete!")
 
@@ -170,7 +170,7 @@ GearCycle:
 
     tooltipLog("Opening gear shop...")
     SendInput, e
-    Sleep, 3000
+    Sleep, 1000
     if(isShopOpen()) {
         startUINav()
         tooltipLog("Shopping for gear...")
@@ -294,7 +294,7 @@ ShowTimeTip:
     if(!adminAbuse) {
         ToolTip, Next cycle in %FormattedTime5%`nNext Egg Cycle in %FormattedTime30%
     }
-    
+
     if (SecondsUntil30 < 3 || adminAbuse) {
         canDoEgg := true
     }
@@ -328,7 +328,7 @@ goShopping(arr, allArr, spamCount := 50) {
 goShoppingEgg(arr, allArr) {
     keyEncoder("RRRR")
     repeatKey("Up", 40)
-    keyEncoder("R")
+    keyEncoder("LLLLURRRRRDD")
     for index, item in allArr {
         if(!arrContains(arr, item)) {
             repeatKey("Down")
@@ -339,19 +339,21 @@ goShoppingEgg(arr, allArr) {
     if(messageQueue.Length() = 0) {
         messageQueue.Push("Bought nothing...")
     }
-    ; repeatKey("Up", 40)
-    ; keyEncoder("ULLURRRRDRE")
-    ; SafeClickRelative(0.68, 0.28)
-    goToEggClose()
+    repeatKey("Up", 40)
+    startUINav()
+    startUINav()
+    keyEncoder("ULLURRRRDRLRE") ; method 1
+    ; goToEggClose() ; method 2
+    ; SafeClickRelative(0.68, 0.28) ; method 3
 }
 
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
-    if(isThereStock()) {  
+    if(isThereStock()) {
         if(item != "Trowel") {
             repeatKey("Left")
-        }  
+        }
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
@@ -371,11 +373,11 @@ isShopOpen() {
     return (colorDetect(0x50240c) || colorDetect(0x360805)) && !disconnectColorCheck()
 }
 
-colorDetect(c, v := 10) {
-    startXPercent := 40
+colorDetect(c, v := 5) {
+    startXPercent := 43
     startYPercent := 27
-    endXPercent := 60
-    endYPercent := 85
+    endXPercent := 56
+    endYPercent := 82
 
     CoordMode, Pixel, Screen
 
@@ -405,7 +407,7 @@ disconnectColorCheck() {
     x2 := Round((endXPercent / 100) * A_ScreenWidth)
     y2 := Round((endYPercent / 100) * A_ScreenHeight)
 
-    ImageSearch, px, py, x1, y1, x2, y2, *3 images/gray.png
+    ImageSearch, px, py, x1, y1, x2, y2, images/gray.png
     if(ErrorLevel = 0) {
         longRecon := true
         return true
@@ -415,12 +417,45 @@ disconnectColorCheck() {
 
 ; only for get because it might be inconsistent
 goToEggClose() {
-  SafeClickRelative(0.68, 0.28)
-  Sleep 100
-  SafeClickRelative(0.67, 0.29)
-  Sleep 100
-  SafeClickRelative(0.66, 0.29)
+    startXPercent := 50
+    startYPercent := 15
+    endXPercent := 72
+    endYPercent := 35
+
+    CoordMode, Pixel, Screen
+
+    x1 := Round((startXPercent / 100) * A_ScreenWidth)
+    y1 := Round((startYPercent / 100) * A_ScreenHeight)
+    x2 := Round((endXPercent / 100) * A_ScreenWidth)
+    y2 := Round((endYPercent / 100) * A_ScreenHeight)
+
+    ImageSearch, px, py, x1, y1, x2, y2, *10 images/close.png
+    finalX := px + (0.01 * A_ScreenWidth)
+    finalY := py + (0.01 * A_ScreenHeight)
+    if(ErrorLevel = 0) {
+        Click, %finalX%, %finalY%
+        return
+    } else if (ErrorLevel = 2) {
+        tooltipLog("Error: Failed to find search image (Redownload Macro!)")
+        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 16711680)
+        reconnect()
     }
+
+    ImageSearch, px, py, x1, y1, x2, y2, *10 images/close_hover.png
+    finalX := px + (0.01 * A_ScreenWidth)
+    finalY := py + (0.01 * A_ScreenHeight)
+    if(ErrorLevel = 0) {
+        Click, %finalX%, %finalY%
+    } else if (ErrorLevel = 1) {
+        tooltipLog("Error: Did not find egg shop close button")
+        sendDiscordMessage("Did not find egg shop close button! Reconnecting...", 16711680)
+        reconnect()
+    } else if (ErrorLevel = 2) {
+        tooltipLog("Error: Failed to find search image (Redownload Macro!)")
+        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 16711680)
+        reconnect()
+    }
+}
 
 SafeMoveRelative(xRatio, yRatio) {
     if !WinExist("ahk_exe RobloxPlayerBeta.exe") {
@@ -470,19 +505,19 @@ keyEncoder(str) {
         StringLower, key, A_LoopField
 
         if(key = "r") {
-            repeatKey("Right")
+            repeatKey("right")
         }
         if(key = "l") {
-            repeatKey("Left")
+            repeatKey("left")
         }
         if(key = "u") {
-            repeatKey("Up")
+            repeatKey("up")
         }
         if(key = "d") {
-            repeatKey("Down")
+            repeatKey("down")
         }
         if(key = "e") {
-            repeatKey("Enter")
+            repeatKey("enter")
         }
         if(key = "w") {
             Sleep, 100
@@ -769,9 +804,8 @@ ShowGui:
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Checkbox, x50 y295 w151 h23 vadminAbuse, Admin Abuse 
+    Gui, Add, Checkbox, x50 y295 w151 h23 vadminAbuse, Admin Abuse
 
-    
     Gui, Tab, Credits
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%
@@ -823,10 +857,10 @@ UpdatePerfSetting:
     }
     saveValues()
 Return
-    
+
 UpdatePlayerValues:
     Gui, Submit, NoHide
-    
+
     privateServerLink := Trim(privateServerLink)
     webhookURL := Trim(webhookURL)
     discordID := Trim(discordID)
@@ -964,7 +998,7 @@ UpdateEggState:
 return
 
 Close:
-    sendDiscordMessage("Macro Exited!", 16711680, true)
+    sendDiscordMessage("Macro Exited!", 0, true)
 ExitApp
 return
 
@@ -978,9 +1012,7 @@ return
 
 PauseMacro:
     sendDiscordMessage("Macro paused!", 16711680)
-    Gui, Submit, NoHide
-    Sleep, 50
-    started := 0
+    Reload
 Return
 
 GuiStartMacro:
@@ -995,5 +1027,4 @@ Return
 
 F7::
     Gosub, PauseMacro
-    Reload
 Return

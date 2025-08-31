@@ -1,12 +1,6 @@
 #SingleInstance, force
 
-global version := "v2.7.4"
-
-global privateServerLink := ""
-global webhookURL := ""
-global discordID := ""
-global longRecon := false
-global adminAbuse := false
+global version := "v2.7.5"
 
 ; -------- Configurable Variables --------
 global uiNavKeybind := "\"
@@ -54,6 +48,12 @@ scrollCount["Zen Egg"] := 2
 scrollCount["Zen Crate"] := 2
 scrollCount["Zen Gnome Crate"] := 2
 
+global privateServerLink := ""
+global webhookURL := ""
+global discordID := ""
+global longRecon := false
+global adminAbuse := false
+
 global finished := true
 global cycleCount := 0
 global eggCounter := 0
@@ -62,6 +62,7 @@ global canDoEgg := true
 global started := 0
 global messageQueue := []
 global sleepPerf := 200
+global crashCounter := 0
 
 global perfSetting := "Default"
 
@@ -77,6 +78,12 @@ StartMacro:
     finished := false
 
 Alignment:
+    if(crashCounter >= 3) {
+        sendDiscordMessage("Crashed 3 times in a row, pausing macro!", 16711680, true)
+        MsgBox, Crashed 3 times in a row, press OK to continue!
+        crashCounter := 0
+    }
+
     exitIfWindowDies()
     SetTimer, ShowTimeTip, Off
     tooltipLog("Placing Recall Wrench in slot 2...")
@@ -231,6 +238,7 @@ WaitForNextCycle:
     SafeMoveRelative(0.5, 0.5)
     finished := true
     cycleCount += 1
+    crashCounter := 0
     SetTimer, ShowTimeTip, 1000
     sendDiscordMessage("Cycle " . cycleCount . " finished", 65280)
 Return
@@ -267,6 +275,7 @@ reconnect() {
     SafeClickRelative(0.5, 0.5)
     Sleep, 15000
     sendDiscordMessage("Reconnected to the game!", 65280)
+    crashCounter += 1
     Gosub, Alignment
 }
 
@@ -328,7 +337,9 @@ goShopping(arr, allArr, spamCount := 50) {
 goShoppingEgg(arr, allArr) {
     keyEncoder("RRRR")
     repeatKey("Up", 40)
-    keyEncoder("LLLLURRRRRDD")
+    startUINav()
+    startUINav()
+    keyEncoder("UULLLLURRRRRDD")
     for index, item in allArr {
         if(!arrContains(arr, item)) {
             repeatKey("Down")
@@ -342,7 +353,7 @@ goShoppingEgg(arr, allArr) {
     repeatKey("Up", 40)
     startUINav()
     startUINav()
-    keyEncoder("ULLURRRRDRLRE") ; method 1
+    keyEncoder("ULLLLLLLLURRRRDRLRE") ; method 1
     ; goToEggClose() ; method 2
     ; SafeClickRelative(0.68, 0.28) ; method 3
 }
@@ -390,6 +401,10 @@ colorDetect(c, v := 5) {
     ; MouseMove, px, py ; uncomment to test colo(u)r detection
     if(ErrorLevel = 0) {
         return true
+    } else if (ErrorLevel = 2) {
+        tooltipLog("FATAL ERROR: Failed to start colour detection")
+        sendDiscordMessage("FATAL ERROR: Failed to start colour detection", 0)
+        Gosub, Close
     }
     return false
 }
@@ -411,6 +426,10 @@ disconnectColorCheck() {
     if(ErrorLevel = 0) {
         longRecon := true
         return true
+    } else if (ErrorLevel = 2) {
+        tooltipLog("FATAL ERROR: Failed to find search image (Redownload Macro!)")
+        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 0)
+        Gosub, Close
     }
     return false
 }
@@ -451,9 +470,9 @@ goToEggClose() {
         sendDiscordMessage("Did not find egg shop close button! Reconnecting...", 16711680)
         reconnect()
     } else if (ErrorLevel = 2) {
-        tooltipLog("Error: Failed to find search image (Redownload Macro!)")
-        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 16711680)
-        reconnect()
+        tooltipLog("FATAL ERROR: Failed to find search image (Redownload Macro!)")
+        sendDiscordMessage("Failed to find search image, __**Redownload the Macro**__!", 0)
+        Gosub, Close
     }
 }
 
@@ -760,7 +779,6 @@ ShowGui:
         Gui, Add, Checkbox, x%x% y%y% w140 h23 gUpdateEggState veggCheckboxes%A_Index% Checked%isChecked%, % egg
     }
 
-    ; ! experimental ping list, disable this before hotfix!
     Gui, Tab, Ping List
     Gui, Add, ListView, r15 x30 y90 w%groupBoxW% BackgroundBlack gAddToPingList Checked NoSort AltSubmit -Hdr vPingListLV, Ping List
 
@@ -784,27 +802,28 @@ ShowGui:
     Gui, Font, s10
     Gui, Add, GroupBox, x%groupBoxX% y%groupBoxY% w%groupBoxW% h%groupBoxH%,
 
-    Gui, Add, Text, x50 y125 w150 h30, Private Server Link
-    Gui, Add, Text, x50 y155 w150 h30, Webhook URL
-    Gui, Add, Text, x50 y185 w150 h30, Discord User ID
-    Gui, Add, Text, x50 y235 w150 h30, Performance Setting
-    Gui, Add, Text, x50 y265 w150 h30, UI Navigation Keybind
-    Gui, Font, s6 cGray, Segoe UI
+    Gui, Add, Text, x50 y105 w150 h30, Private Server Link
+    Gui, Add, Text, x50 y135 w150 h30, Webhook URL
+    Gui, Add, Text, x50 y165 w150 h30, Discord User ID
+    Gui, Add, Text, x50 y205 w150 h30, Performance Setting
+    Gui, Add, Text, x50 y235 w150 h30, UI Navigation Keybind
 
-    Gui, Add, Link, x50 y205 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
+    Gui, Font, s6 cGray, Segoe UI
+    Gui, Add, Link, x50 y185 w200 h15, <a href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode">(Enable Developer Mode in Discord to get your ID)</a>
     Gui, Font, s8 cBlack, Segoe UI
-    Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y125, % privateServerLink
-    Gui, Add, Edit, gUpdatePlayerValues r1 vwebhookURL w185 x315 y155, % webhookURL
-    Gui, Add, Edit, gUpdatePlayerValues r1 vdiscordID w185 x315 y185, % discordID
+
+    Gui, Add, Edit, gUpdatePlayerValues r1 vprivateServerLink w185 x315 y105, % privateServerLink
+    Gui, Add, Edit, gUpdatePlayerValues r1 vwebhookURL w185 x315 y135, % webhookURL
+    Gui, Add, Edit, gUpdatePlayerValues r1 vdiscordID w185 x315 y165, % discordID
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
-    Gui  Add, Edit, w185 x315 y265 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
-    Gui, Add, DropDownList, w185 x315 y235 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
+    Gui, Add, DropDownList, w185 x315 y205 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
+    Gui  Add, Edit, w185 x315 y235 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)
     Gui, Font, s10 cWhite, Segoe UI
-    Gui, Add, Checkbox, x50 y295 w151 h23 vadminAbuse, Admin Abuse
+    Gui, Add, Checkbox, x50 y275 w151 h23 vadminAbuse, Admin Abuse
 
     Gui, Tab, Credits
     Gui, Font, s10

@@ -1,6 +1,6 @@
 #SingleInstance, force
 #SingleInstance, force
-#Include Gdip.ahk  ; Make sure Gdip.ahk is in the same folder as this script
+#Include C:\AHKLib\Gdip.ahk ; Make sure Gdip.ahk is in the same folder as this script
 
 ; --- GDI+ Setup ---
 if !pToken := Gdip_Startup()

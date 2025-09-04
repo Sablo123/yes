@@ -1,5 +1,6 @@
 #SingleInstance, force
 #SingleInstance, force
+#Include C:\AHKLib\Gdip.ahk
 #Include C:\AHKLib\Gdip.ahk ; Make sure Gdip.ahk is in the same folder as this script
 
 ; --- GDI+ Setup ---
@@ -16,42 +17,6 @@ CloseGDIPlus() {
     if (pToken)
         Gdip_Shutdown(pToken)
 }
-
-global version := "v2.7.5"
-
-; -------- Configurable Variables --------
-global uiNavKeybind := "\"
-global invNavKeybind := "``"
-
-; Edit this to change the seeds
-global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
-    , "Orange Tulip Seed", "Tomato Seed", "Corn Seed"
-    , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
-    , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
-    , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
-    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
-    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry","Romanesco"]
-
-; Edit this to change the gear
-global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
-    , "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
-    , "Medium Toy","Medium Treat", "Godly Sprinkler"
-    , "Magnifying Glass", "Master Sprinkler", "Cleaning Spray", "Cleansing Pet Shard"
-    , "Favorite Tool", "Harvest Tool", "Friendship Pot"
-    , "Grandmaster Sprinkler", "Levelup Lollipop"]
-
-; Edit this to change the eggs
-global eggItems := ["Common Egg", "Uncommon Egg", "Rare Egg", "Legendarry Egg", "Mythical Egg", "Bug Egg"]
-
-; Edit this to change what you want to be pinged for
-global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed","Elder Strawberry", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
-
-; --- Technical Variables ---
-global allList := []
-allList.Push(seedItems*)
-allList.Push(gearItems*)
-allList.Push(eggItems*)
-
 ; --- Screenshot Function ---
 takeScreenshot(filename := "screenshot.png") {
     ; Create folder if missing
@@ -63,7 +28,7 @@ takeScreenshot(filename := "screenshot.png") {
         return  ; Roblox window not found
 
     ; Capture screenshot
-    pBitmap := Gdip_BitmapFromScreen({x:winX, y:winy, w:winW, h:winH})
+    pBitmap := Gdip_BitmapFromScreen({x:winX, y:winY, w:winW, h:winH})
     filePath := "Screenshots\" . filename
     Gdip_SaveBitmapToFile(pBitmap, filePath)
     Gdip_DisposeImage(pBitmap)
@@ -129,7 +94,7 @@ global canDoEgg := true
 
 global started := 0
 global messageQueue := []
-global sleepPerf := 200
+global sleepPerf := 75
 global crashCounter := 0
 
 global perfSetting := "Default"
@@ -892,7 +857,7 @@ ShowGui:
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
-    Gui, Add, DropDownList, w185 x315 y205 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
+    Gui, Add, DropDownList, w185 x315 y205 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui  Add, Edit, w185 x315 y235 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)

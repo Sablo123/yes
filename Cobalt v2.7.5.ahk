@@ -63,7 +63,7 @@ takeScreenshot(filename := "screenshot.png") {
         return  ; Roblox window not found
 
     ; Capture screenshot
-    pBitmap := Gdip_BitmapFromScreen(winX, winY, winW, winH)
+    pBitmap := Gdip_BitmapFromScreen({x:winX, y:winy, w:winW, h:winH})
     filePath := "Screenshots\" . filename
     Gdip_SaveBitmapToFile(pBitmap, filePath)
     Gdip_DisposeImage(pBitmap)

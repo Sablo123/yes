@@ -1,38 +1,24 @@
 #SingleInstance, force
-#SingleInstance, force
+; -------- Include and initialize GDI+ for screenshots --------
 #Include C:\AHKLib\Gdip.ahk
-#Include C:\AHKLib\Gdip.ahk ; Make sure Gdip.ahk is in the same folder as this script
-
-; --- GDI+ Setup ---
-if !pToken := Gdip_Startup()
-{
-    MsgBox, Failed to start GDI+.
+if !pToken := Gdip_Startup() {
+    MsgBox, 16, Error, GDI+ failed to start. Exiting...
     ExitApp
 }
 
-; Ensure GDI+ shuts down cleanly on exit
-OnExit("CloseGDIPlus")
-CloseGDIPlus() {
-    global pToken
-    if (pToken)
-        Gdip_Shutdown(pToken)
-}
-; --- Screenshot Function ---
-takeScreenshot(filename := "screenshot.png") {
-    ; Create folder if missing
-    FileCreateDir, Screenshots
-
-    ; Get Roblox window position
-    WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
-    if (winW = "")
-        return  ; Roblox window not found
-
-    ; Capture screenshot
-    pBitmap := Gdip_BitmapFromScreen({x:winX, y:winY, w:winW, h:winH})
-    filePath := "Screenshots\" . filename
+; -------- Screenshot function --------
+takeScreenshot(filePath := "") {
+    if (filePath = "") {
+        filePath := "C:\AHKLib\Screenshots\Screenshot_" . A_Now . ".png"
+    }
+    SplitPath, filePath, , dir
+    FileCreateDir, %dir%
+    
+    pBitmap := Gdip_BitmapFromScreen()
     Gdip_SaveBitmapToFile(pBitmap, filePath)
     Gdip_DisposeImage(pBitmap)
 }
+
 global version := "v2.7.5"
 
 ; -------- Configurable Variables --------
@@ -94,7 +80,7 @@ global canDoEgg := true
 
 global started := 0
 global messageQueue := []
-global sleepPerf := 75
+global sleepPerf := 200
 global crashCounter := 0
 
 global perfSetting := "Default"
@@ -274,9 +260,6 @@ WaitForNextCycle:
     crashCounter := 0
     SetTimer, ShowTimeTip, 1000
     sendDiscordMessage("Cycle " . cycleCount . " finished", 65280)
-    
-    ; Take screenshot every cycle
-    takeScreenshot("cycle_" . cycleCount . ".png")
 Return
 
 tpToGear() {
@@ -397,15 +380,16 @@ goShoppingEgg(arr, allArr) {
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
-    if(isThereStock()) {
+    if(isThereStock() && item != "") { ; only if in stock and selected
+        ; Take screenshot because item is available and you want to buy it
+        filePath := "C:\AHKLib\Screenshots\InStock_" . item . "_" . A_Now . ".png"
+        takeScreenshot(filePath)
+
         if(item != "Trowel") {
             repeatKey("Left")
         }
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
-
-        ; Take screenshot when something is bought
-        takeScreenshot(item . "_cycle_" . cycleCount . ".png")
     }
     repeatKey("Down")
 }
@@ -857,7 +841,7 @@ ShowGui:
     choiceIndex := indexOf(["Supercomputer (Doesnt work, for fun)","Modern PC (stable FPS on high)", "Default", "Chromebook (cannot get stable FPS)","Atari 2600 (bless your soul)"], perfSetting)
     Gosub, UpdatePerfSetting
 
-    Gui, Add, DropDownList, w185 x315 y205 vperfSetting Choose%choiceIndex% gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
+    Gui, Add, DropDownList, w185 x315 y205 vperfSetting Choose%choiceIndex%) gUpdatePerfSetting, Supercomputer (Doesnt work, for fun)|Modern PC (stable FPS on high)|Default|Chromebook (cannot get stable FPS)|Atari 2600 (bless your soul)
     Gui  Add, Edit, w185 x315 y235 r1 vuiNavKeybind gUpdatePlayerValues, % uiNavKeybind
     Gui, Add, Button, h30 w215 x50 y350 gGuiStartMacro, Start Macro (F5)
     Gui, Add, Button, h30 w215 x285 y350 gPauseMacro, Stop Macro (F7)

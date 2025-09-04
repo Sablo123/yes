@@ -1,4 +1,56 @@
 #SingleInstance, force
+; ------------------------------------------
+; Function to take a screenshot
+; ------------------------------------------
+takeScreenshot(fileName := "") {
+    if (fileName = "") {
+        FormatTime, fileName, , yyyy-MM-dd_HH-mm-ss
+        fileName := "screenshot_" . fileName . ".png"
+    }
+    
+    SplitPath, A_ScriptFullPath, scriptName, scriptDir
+    filePath := scriptDir . "\" . fileName
+
+    pBitmap := Gdip_BitmapFromScreen()
+    Gdip_SaveBitmapToFile(pBitmap, filePath)
+    Gdip_DisposeImage(pBitmap)
+}
+
+Gdip_Startup() {
+    static pToken
+    if !pToken
+        DllCall("gdiplus\GdiplusStartup", "UPtrP", pToken, "UPtr", &GdipStartupInput := Struct("GdiplusStartupInput", "ULONG GdiplusVersion;ULONG_PTR DebugEventCallback;BOOL SuppressBackgroundThread;BOOL SuppressExternalCodecs"), "UPtr", 0)
+    return pToken
+}
+
+Gdip_BitmapFromScreen() {
+    static token := Gdip_Startup()
+    hDC := DllCall("GetDC", "UPtr", 0)
+    hMemDC := DllCall("CreateCompatibleDC", "UPtr", hDC)
+    width := A_ScreenWidth, height := A_ScreenHeight
+    hBitmap := DllCall("CreateCompatibleBitmap", "UPtr", hDC, "Int", width, "Int", height)
+    obm := DllCall("SelectObject", "UPtr", hMemDC, "UPtr", hBitmap)
+    DllCall("BitBlt", "UPtr", hMemDC, "Int", 0, "Int", 0, "Int", width, "Int", height, "UPtr", hDC, "Int", 0, "Int", 0, "UInt", 0x00CC0020)
+    DllCall("SelectObject", "UPtr", hMemDC, "UPtr", obm)
+    DllCall("DeleteDC", "UPtr", hMemDC)
+    DllCall("ReleaseDC", "UPtr", 0, "UPtr", hDC)
+    return hBitmap
+}
+
+Gdip_SaveBitmapToFile(hBitmap, sFile) {
+    pCLSID := Gdip_Startup_EncoderClsid("image/png")
+    DllCall("gdiplus\GdipSaveImageToFile", "UPtr", hBitmap, "WStr", sFile, "UPtr", pCLSID, "UPtr", 0)
+}
+
+Gdip_DisposeImage(hBitmap) {
+    DllCall("gdiplus\GdipDisposeImage", "UPtr", hBitmap)
+}
+
+Gdip_Startup_EncoderClsid(format := "image/png") {
+    VarSetCapacity(EncoderClsid, 16*4, 0)
+    VarSetCapacity(CodecCount, 4, 0)
+    VarSetCapacity(CodecSize, 4, 0)
+    DllCall("gdiplus\GdipGetImageEncodersSize", "UIntP", Co
 
 global version := "v2.7.5"
 
@@ -373,7 +425,13 @@ buyAllAvailable(spamCount := 50, item := "") {
 
 isThereStock() {
     Sleep, 200
-    return colorDetect(0x20b41c) || colorDetect(0x26EE26)
+    stock := colorDetect(0x20b41c) || colorDetect(0x26EE26)
+    
+    if (stock) {
+        takeScreenshot("stock_" . A_Now . ".png")
+    }
+    
+    return stock
 }
 
 isShopOpen() {

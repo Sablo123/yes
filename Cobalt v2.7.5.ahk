@@ -1,57 +1,73 @@
 #SingleInstance, force
-; ------------------------------------------
-; Function to take a screenshot
-; ------------------------------------------
-takeScreenshot(fileName := "") {
-    if (fileName = "") {
-        FormatTime, fileName, , yyyy-MM-dd_HH-mm-ss
-        fileName := "screenshot_" . fileName . ".png"
-    }
-    
-    SplitPath, A_ScriptFullPath, scriptName, scriptDir
-    filePath := scriptDir . "\" . fileName
+#SingleInstance, force
+#Include Gdip.ahk  ; Make sure Gdip.ahk is in the same folder as this script
 
-    pBitmap := Gdip_BitmapFromScreen()
+; --- GDI+ Setup ---
+if !pToken := Gdip_Startup()
+{
+    MsgBox, Failed to start GDI+.
+    ExitApp
+}
+
+; Ensure GDI+ shuts down cleanly on exit
+OnExit("CloseGDIPlus")
+CloseGDIPlus() {
+    global pToken
+    if (pToken)
+        Gdip_Shutdown(pToken)
+}
+
+global version := "v2.7.5"
+
+; -------- Configurable Variables --------
+global uiNavKeybind := "\"
+global invNavKeybind := "``"
+
+; Edit this to change the seeds
+global seedItems := ["Carrot Seed", "Strawberry Seed", "Blueberry Seed"
+    , "Orange Tulip Seed", "Tomato Seed", "Corn Seed"
+    , "Daffodil Seed", "Watermelon Seed", "Pumpkin Seed"
+    , "Apple Seed", "Bamboo Seed", "Coconut Seed", "Cactus Seed"
+    , "Dragon Fruit Seed", "Mango Seed", "Grape Seed", "Mushroom Seed"
+    , "Pepper Seed", "Cacao Seed", "Beanstalk Seed", "Ember Lily"
+    , "Sugar Apple", "Burning Bud", "Giant Pinecone Seed", "Elder Strawberry","Romanesco"]
+
+; Edit this to change the gear
+global gearItems := ["Watering Can", "Trading Ticket", "Trowel"
+    , "Recall Wrench", "Basic Sprinkler", "Advanced Sprinkler"
+    , "Medium Toy","Medium Treat", "Godly Sprinkler"
+    , "Magnifying Glass", "Master Sprinkler", "Cleaning Spray", "Cleansing Pet Shard"
+    , "Favorite Tool", "Harvest Tool", "Friendship Pot"
+    , "Grandmaster Sprinkler", "Levelup Lollipop"]
+
+; Edit this to change the eggs
+global eggItems := ["Common Egg", "Uncommon Egg", "Rare Egg", "Legendarry Egg", "Mythical Egg", "Bug Egg"]
+
+; Edit this to change what you want to be pinged for
+global pingList := ["Beanstalk Seed", "Ember Lily", "Sugar Apple", "Burning Bud","Giant Pinecone Seed","Elder Strawberry", "Master Sprinkler", "Grandmaster Sprinkler", "Levelup Lollipop", "Medium Treat", "Medium Toy", "Mythical Egg", "Paradise Egg", "Bug Egg"]
+
+; --- Technical Variables ---
+global allList := []
+allList.Push(seedItems*)
+allList.Push(gearItems*)
+allList.Push(eggItems*)
+
+; --- Screenshot Function ---
+takeScreenshot(filename := "screenshot.png") {
+    ; Create folder if missing
+    FileCreateDir, Screenshots
+
+    ; Get Roblox window position
+    WinGetPos, winX, winY, winW, winH, ahk_exe RobloxPlayerBeta.exe
+    if (winW = "")
+        return  ; Roblox window not found
+
+    ; Capture screenshot
+    pBitmap := Gdip_BitmapFromScreen(winX, winY, winW, winH)
+    filePath := "Screenshots\" . filename
     Gdip_SaveBitmapToFile(pBitmap, filePath)
     Gdip_DisposeImage(pBitmap)
 }
-
-Gdip_Startup() {
-    static pToken
-    if !pToken
-        DllCall("gdiplus\GdiplusStartup", "UPtrP", pToken, "UPtr", &GdipStartupInput := Struct("GdiplusStartupInput", "ULONG GdiplusVersion;ULONG_PTR DebugEventCallback;BOOL SuppressBackgroundThread;BOOL SuppressExternalCodecs"), "UPtr", 0)
-    return pToken
-}
-
-Gdip_BitmapFromScreen() {
-    static token := Gdip_Startup()
-    hDC := DllCall("GetDC", "UPtr", 0)
-    hMemDC := DllCall("CreateCompatibleDC", "UPtr", hDC)
-    width := A_ScreenWidth, height := A_ScreenHeight
-    hBitmap := DllCall("CreateCompatibleBitmap", "UPtr", hDC, "Int", width, "Int", height)
-    obm := DllCall("SelectObject", "UPtr", hMemDC, "UPtr", hBitmap)
-    DllCall("BitBlt", "UPtr", hMemDC, "Int", 0, "Int", 0, "Int", width, "Int", height, "UPtr", hDC, "Int", 0, "Int", 0, "UInt", 0x00CC0020)
-    DllCall("SelectObject", "UPtr", hMemDC, "UPtr", obm)
-    DllCall("DeleteDC", "UPtr", hMemDC)
-    DllCall("ReleaseDC", "UPtr", 0, "UPtr", hDC)
-    return hBitmap
-}
-
-Gdip_SaveBitmapToFile(hBitmap, sFile) {
-    pCLSID := Gdip_Startup_EncoderClsid("image/png")
-    DllCall("gdiplus\GdipSaveImageToFile", "UPtr", hBitmap, "WStr", sFile, "UPtr", pCLSID, "UPtr", 0)
-}
-
-Gdip_DisposeImage(hBitmap) {
-    DllCall("gdiplus\GdipDisposeImage", "UPtr", hBitmap)
-}
-
-Gdip_Startup_EncoderClsid(format := "image/png") {
-    VarSetCapacity(EncoderClsid, 16*4, 0)
-    VarSetCapacity(CodecCount, 4, 0)
-    VarSetCapacity(CodecSize, 4, 0)
-    DllCall("gdiplus\GdipGetImageEncodersSize", "UIntP", Co
-
 global version := "v2.7.5"
 
 ; -------- Configurable Variables --------
@@ -293,6 +309,9 @@ WaitForNextCycle:
     crashCounter := 0
     SetTimer, ShowTimeTip, 1000
     sendDiscordMessage("Cycle " . cycleCount . " finished", 65280)
+    
+    ; Take screenshot every cycle
+    takeScreenshot("cycle_" . cycleCount . ".png")
 Return
 
 tpToGear() {
@@ -419,19 +438,16 @@ buyAllAvailable(spamCount := 50, item := "") {
         }
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
+
+        ; Take screenshot when something is bought
+        takeScreenshot(item . "_cycle_" . cycleCount . ".png")
     }
     repeatKey("Down")
 }
 
 isThereStock() {
     Sleep, 200
-    stock := colorDetect(0x20b41c) || colorDetect(0x26EE26)
-    
-    if (stock) {
-        takeScreenshot("stock_" . A_Now . ".png")
-    }
-    
-    return stock
+    return colorDetect(0x20b41c) || colorDetect(0x26EE26)
 }
 
 isShopOpen() {

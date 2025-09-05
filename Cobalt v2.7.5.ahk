@@ -1,24 +1,5 @@
 #SingleInstance, force
-; -------- Include and initialize GDI+ for screenshots --------
-#Include C:\AHKLib\Gdip.ahk
-if !pToken := Gdip_Startup() {
-    MsgBox, 16, Error, GDI+ failed to start. Exiting...
-    ExitApp
-}
-
-; -------- Screenshot function --------
-takeScreenshot(filePath := "") {
-    if (filePath = "") {
-        filePath := "C:\AHKLib\Screenshots\Screenshot_" . A_Now . ".png"
-    }
-    SplitPath, filePath, , dir
-    FileCreateDir, %dir%
-    
-    pBitmap := Gdip_BitmapFromScreen()
-    Gdip_SaveBitmapToFile(pBitmap, filePath)
-    Gdip_DisposeImage(pBitmap)
-}
-
+global stockClicked := {} ; keeps track of items we've already clicked
 global version := "v2.7.5"
 
 ; -------- Configurable Variables --------
@@ -380,10 +361,14 @@ goShoppingEgg(arr, allArr) {
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
-    if(isThereStock() && item != "") { ; only if in stock and selected
-        ; Take screenshot because item is available and you want to buy it
-        filePath := "C:\AHKLib\Screenshots\InStock_" . item . "_" . A_Now . ".png"
-        takeScreenshot(filePath)
+    
+    if (isThereStock()) {
+        ; Click at x:34, y:709 before buying
+        CoordMode, Mouse, Screen
+        MouseMove, 34, 709
+        Sleep, 50
+        Click
+        Sleep, 100
 
         if(item != "Trowel") {
             repeatKey("Left")
@@ -391,6 +376,7 @@ buyAllAvailable(spamCount := 50, item := "") {
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
+    
     repeatKey("Down")
 }
 

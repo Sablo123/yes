@@ -359,32 +359,29 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
     
-if(isThereStock()) {
-    ; --- Stop macro temporarily ---
-    sendDiscordMessage("Stock detected! Taking screenshot...", 16776960)
-    Sleep, 1000
+    if(isThereStock()) {
+        ; --- Take full-screen screenshot if stock detected ---
+        sendDiscordMessage("Stock detected! Taking screenshot...", 16776960)
+        Sleep, 500
 
-; Optional: click coordinates for a full screen snip (adjust if needed)
-Click, 976, 37
-Sleep, 1000
-Click, 997, 107
-Sleep, 1000
+        ; Trigger Windows + Shift + S for Snip & Sketch
+        Send, #{+s}  ; Win + Shift + S
+        Sleep, 500  ; wait for snip overlay to appear
 
-; Wait briefly to ensure screenshot is captured
-Sleep, 1000
+        ; Press Enter to capture full screen immediately
+        Send, {Enter}
+        Sleep, 500  ; small delay for capture to register
 
-    
-    ; After screenshot, continue macro normally
-    if(item != "Trowel") {
-        repeatKey("Left")
+        ; Continue macro normally
+        if(item != "Trowel") {
+            repeatKey("Left")
+        }
+        repeatKey("Enter", spamCount)
+        messageQueue.Push("Bought " . item . "!")
     }
-    repeatKey("Enter", spamCount)
-    messageQueue.Push("Bought " . item . "!")
-}
 
     repeatKey("Down")
 }
-
 
 
 craftItem(shopObj, item) {

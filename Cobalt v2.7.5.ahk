@@ -63,6 +63,10 @@ global perfSetting := "Default"
 
 WinActivate, ahk_exe RobloxPlayerBeta.exe
 Gosub, ShowGui
+openSnipTool() {
+    ; Opens Windows Snip & Sketch (Win + Shift + S equivalent)
+    Run, ms-screenclip:
+}
 
 StartMacro:
     if(started = 0) {
@@ -358,31 +362,15 @@ goShoppingEgg(arr, allArr) {
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
-    
     if(isThereStock()) {
-        ; --- Take full-screen screenshot if stock detected ---
-        sendDiscordMessage("Stock detected! Taking screenshot...", 16776960)
-        Sleep, 500
-
-        ; Trigger Windows + Shift + S for Snip & Sketch
-        Send, #{+s}  ; Win + Shift + S
-        Sleep, 500  ; wait for snip overlay to appear
-
-        ; Press Enter to capture full screen immediately
-        Send, {Enter}
-        Sleep, 500  ; small delay for capture to register
-
-        ; Continue macro normally
         if(item != "Trowel") {
             repeatKey("Left")
         }
         repeatKey("Enter", spamCount)
         messageQueue.Push("Bought " . item . "!")
     }
-
     repeatKey("Down")
 }
-
 
 craftItem(shopObj, item) {
     keyEncoder("RRRR")
@@ -1081,4 +1069,7 @@ Return
 
 F7::
     Gosub, PauseMacro
+Return
+# + s::  ; Windows + Shift + S
+    openSnipTool()
 Return

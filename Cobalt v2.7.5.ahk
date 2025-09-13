@@ -361,7 +361,7 @@ buyAllAvailable(spamCount := 50, item := "") {
     if(isThereStock()) {
         ; === NEW PART START ===
         ; Pause macro flow and click coords in order
-        Click, 209, 267
+        Click, 28, 697
         Sleep, 300
         Click, 976, 37
         Sleep, 300

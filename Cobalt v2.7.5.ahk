@@ -359,32 +359,32 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
     
-    if(isThereStock()) {
-        ; === Option 1: Double-click On-Screen Keyboard key ===
-        WinActivate, On-Screen Keyboard
-        Sleep, 200
-        
-        Click, 28, 697
-        Sleep, 50
-        Click, 28, 697
-        Sleep, 200
-        
-        ; Switch back to Roblox
-        WinActivate, ahk_exe RobloxPlayerBeta.exe
-        Sleep, 200
+if(isThereStock()) {
+    ; --- Stop macro temporarily ---
+    sendDiscordMessage("Stock detected! Taking screenshot...", 16776960)
+    Sleep, 200
 
-        ; Continue with your normal clicks in the game
-        Click, 976, 37
-        Sleep, 300
-        Click, 997, 107
-        Sleep, 500
+    ; Press Windows + Shift + S
+    Send, #{+s}
+    Sleep, 500
 
-        if(item != "Trowel") {
-            repeatKey("Left")
-        }
-        repeatKey("Enter", spamCount)
-        messageQueue.Push("Bought " . item . "!")
+    ; Click the specified coordinates in order
+    Click, 976, 37
+    Sleep, 300
+    Click, 997, 107
+    Sleep, 500
+
+    ; Pause macro until user confirms screenshot is done
+    MsgBox, 64, Screenshot Pause, Take your screenshot and press OK to continue the macro.
+    
+    ; After screenshot, continue macro normally
+    if(item != "Trowel") {
+        repeatKey("Left")
     }
+    repeatKey("Enter", spamCount)
+    messageQueue.Push("Bought " . item . "!")
+}
+
     repeatKey("Down")
 }
 

@@ -362,20 +362,17 @@ buyAllAvailable(spamCount := 50, item := "") {
 if(isThereStock()) {
     ; --- Stop macro temporarily ---
     sendDiscordMessage("Stock detected! Taking screenshot...", 16776960)
-    Sleep, 200
+    Sleep, 1000
 
-    ; Press Windows + Shift + S
-    Send, #{+s}
-    Sleep, 500
+; Optional: click coordinates for a full screen snip (adjust if needed)
+Click, 976, 37
+Sleep, 1000
+Click, 997, 107
+Sleep, 1000
 
-    ; Click the specified coordinates in order
-    Click, 976, 37
-    Sleep, 300
-    Click, 997, 107
-    Sleep, 500
+; Wait briefly to ensure screenshot is captured
+Sleep, 1000
 
-    ; Pause macro until user confirms screenshot is done
-    MsgBox, 64, Screenshot Pause, Take your screenshot and press OK to continue the macro.
     
     ; After screenshot, continue macro normally
     if(item != "Trowel") {

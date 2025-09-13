@@ -359,11 +359,11 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
     if(isThereStock()) {
-        ; Always click coords when stock is true
-        Click, 28, 697       ; First click
-        Sleep, 150
-        Click, 28, 697       ; Second click at same spot
+        ; === NEW: Double-click the On-Screen Keyboard at (28,697) ===
+        ControlClick, x28 y697, On-Screen Keyboard,,, 2
         Sleep, 300
+
+        ; Then continue with your normal clicks in the game
         Click, 976, 37
         Sleep, 300
         Click, 997, 107

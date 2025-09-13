@@ -358,12 +358,22 @@ goShoppingEgg(arr, allArr) {
 buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
+    
     if(isThereStock()) {
-        ; === NEW: Double-click the On-Screen Keyboard at (28,697) ===
-        ControlClick, x28 y697, On-Screen Keyboard,,, 2
-        Sleep, 300
+        ; === Option 1: Double-click On-Screen Keyboard key ===
+        WinActivate, On-Screen Keyboard
+        Sleep, 200
+        
+        Click, 28, 697
+        Sleep, 50
+        Click, 28, 697
+        Sleep, 200
+        
+        ; Switch back to Roblox
+        WinActivate, ahk_exe RobloxPlayerBeta.exe
+        Sleep, 200
 
-        ; Then continue with your normal clicks in the game
+        ; Continue with your normal clicks in the game
         Click, 976, 37
         Sleep, 300
         Click, 997, 107
@@ -377,6 +387,7 @@ buyAllAvailable(spamCount := 50, item := "") {
     }
     repeatKey("Down")
 }
+
 
 
 craftItem(shopObj, item) {

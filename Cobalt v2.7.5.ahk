@@ -359,15 +359,15 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
     if(isThereStock()) {
-        ; === NEW PART START ===
-        ; Pause macro flow and click coords in order
-        Click, 28, 697
+        ; Always click coords when stock is true
+        Click, 28, 697       ; First click
+        Sleep, 150
+        Click, 28, 697       ; Second click at same spot
         Sleep, 300
         Click, 976, 37
         Sleep, 300
         Click, 997, 107
         Sleep, 500
-        ; === NEW PART END ===
 
         if(item != "Trowel") {
             repeatKey("Left")

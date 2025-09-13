@@ -359,6 +359,16 @@ buyAllAvailable(spamCount := 50, item := "") {
     repeatKey("Enter")
     repeatKey("Down")
     if(isThereStock()) {
+        ; === NEW PART START ===
+        ; Pause macro flow and click coords in order
+        Click, 209, 267
+        Sleep, 300
+        Click, 976, 37
+        Sleep, 300
+        Click, 997, 107
+        Sleep, 500
+        ; === NEW PART END ===
+
         if(item != "Trowel") {
             repeatKey("Left")
         }
@@ -367,6 +377,7 @@ buyAllAvailable(spamCount := 50, item := "") {
     }
     repeatKey("Down")
 }
+
 
 craftItem(shopObj, item) {
     keyEncoder("RRRR")
